@@ -3,14 +3,22 @@ kind: Ingress
 metadata:
   name: mealie
   namespace: mealie
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    # cert-manager.io/cluster-issuer: "letsencrypt-prod" # Uncomment later when cert-manager works
 spec:
-  entryPoints:
-    - websecure
-  routes:
-  - match: Host(`mealie.home.lab`)
-    kind: Rule
-    services:
-    - name: mealie
-      port: 80
-  tls:
-    certResolver: default
+  rules:
+  - host: mealie.home.lab # Your domain
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: mealie
+            port:
+              number: 80 # Assuming your Mealie service is on port 80
+  # tls: # Uncomment this section later for HTTPS
+  # - hosts:
+  #   - mealie.home.lab
+  #   secretName: mealie-tls
