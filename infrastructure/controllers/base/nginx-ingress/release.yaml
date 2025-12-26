@@ -2,7 +2,7 @@ apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: nginx-ingress
-  namespace: flux-system # Chart will be installed in this namespace
+  namespace: nginx-ingress # Chart will be installed in this namespace
 spec:
   interval: 5m
   chart:
@@ -12,7 +12,7 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: nginx-ingress
-        namespace: flux-system
+        namespace: nginx-ingress
   values:
     controller:
       # Basic settings good for any environment
