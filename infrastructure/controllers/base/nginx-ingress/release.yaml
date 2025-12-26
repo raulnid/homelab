@@ -13,17 +13,3 @@ spec:
         kind: HelmRepository
         name: nginx-ingress
         namespace: nginx-ingress
-  values:
-    controller:
-      # Basic settings good for any environment
-      replicaCount: 1
-      service:
-        type: LoadBalancer   # Use 'NodePort' if not on a cloud with LB
-        loadBalancerIP: 192.168.1.240
-        ports:
-          - name: http
-            port: 80
-            targetPort: http
-          - name: https
-            port: 443
-            targetPort: https
