@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: mealie
 spec:
-  replicas: 2
+  replicas: 4
   selector:
     matchLabels:
       app: mealie
