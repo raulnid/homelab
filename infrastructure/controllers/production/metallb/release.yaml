@@ -1,0 +1,14 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: metallb
+  namespace: metallb-system
+spec:
+  values:
+    # This is the new configuration using CRDs (native mode)
+    configInline:
+      address-pools:
+        - name: default
+          protocol: layer2
+          addresses:
+            - 192.168.1.240-192.168.1.250 # ⚠️ CHANGE THIS to your IP range
