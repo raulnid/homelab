@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mealie-configmap
+data:
+  BASE_URL: "https://mealie.home.lab"
+  ALLOW_SIGNUP: "false"
+  POSTGRES_HOST: "mealie-postgresql.mealie.svc.cluster.local"
+  POSTGRES_USER: "mealie"
