@@ -1,0 +1,26 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: nginx-ingress
+  namespace: nginx-ingress
+spec:
+  chart:
+    spec:
+      version: "4.9.1"       # Pins an exact, stable version for production
+  values:
+    controller:
+      replicaCount: 2        # More replicas for production availability
+      service:
+        type: NodePort
+        #annotations:
+          # Example: If using a cloud provider, annotations for the LB go here
+          #service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+      resources:
+        requests:
+          memory: "256Mi"
+          cpu: "250m"
+        limits:
+          memory: "512Mi"
+          cpu: "500m"
+    prometheus:
+      create: true

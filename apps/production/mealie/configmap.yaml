@@ -5,5 +5,6 @@ metadata:
 data:
   BASE_URL: "https://mealie.home.lab"
   ALLOW_SIGNUP: "false"
-  POSTGRES_HOST: "mealie-postgresql.mealie.svc.cluster.local"
+  POSTGRES_HOST: "192.168.1.11"
   POSTGRES_USER: "mealie"
+  POSTGRES_DB: "mealie"

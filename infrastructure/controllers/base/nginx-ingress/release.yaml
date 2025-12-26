@@ -1,0 +1,21 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: nginx-ingress
+  namespace: nginx-ingress  # Chart will be installed in this namespace
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: ingress-nginx
+      version: "~4.x.x"      # Uses the latest in the 4.x series
+      sourceRef:
+        kind: HelmRepository
+        name: nginx-ingress
+        namespace: flux-system
+  values:
+    controller:
+      # Basic settings good for any environment
+      replicaCount: 1
+      service:
+        type: LoadBalancer   # Use 'NodePort' if not on a cloud with LB
