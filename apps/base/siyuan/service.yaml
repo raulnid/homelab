@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: mealie
+  name: siyuan
 spec:
   ports:
     - port: 80
-      targetPort: 9000
+      targetPort: 6806
   selector:
-    app: mealie
+    app: siyuan

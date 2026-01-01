@@ -4,11 +4,11 @@ metadata:
   name: infrastructure
   namespace: flux-system
 spec:
-  interval: 10m  # Check for changes every 10 minuts
-  path: ./infrastructure/controllers/production  # <-- KEY: Points to your production infra
-  prune: true  # Automatically remove objects deleted from Git
+  interval: 10m # Check for changes every 10 minuts
+  path: ./infrastructure/controllers/production
+  prune: true # Automatically remove objects deleted from Git
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  wait: true  # Wait for all resources to be ready before marking as complete
+  wait: true

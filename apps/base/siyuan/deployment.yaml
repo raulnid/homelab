@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: siyuan
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: siyuan
+  template:
+    metadata:
+      labels:
+        app: siyuan
+    spec:
+      securityContext:
+        fsGroup: 1000
+      containers:
+        - name: siyuan
+          image: b3log/siyuan:latest
+          ports:
+            - containerPort: 6806
+          command:
+            - "/opt/siyuan/kernel"
+          args:
+            - "--workspace=/siyuan/workspace/"
+          envFrom:
+            - configMapRef:
+                name: siyuan-configmap
+            - secretRef:
+                name: siyuan-secrets
+          volumeMounts:
+            - name: data
+              mountPath: /siyuan/workspace
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+      volumes:
+        - name: data
+          persistenVolumeClaim:
+            claimName: siyuan-data

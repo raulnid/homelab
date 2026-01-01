@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: mealie-configmap
 data:
-  BASE_URL: "https://mealie.home.lab"
+  BASE_URL: "https://mealie.xzr.es"
   ALLOW_SIGNUP: "false"
   POSTGRES_HOST: "192.168.1.11"
   POSTGRES_USER: "mealie"

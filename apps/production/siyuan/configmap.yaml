@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: siyuan-configmap
+data:
+  TZ: "Europe/Madrid"
+  PUID: "1000"
+  PGID: "1000"

@@ -13,19 +13,19 @@ spec:
         app: mealie
     spec:
       containers:
-      - name: mealie
-        image: ghcr.io/mealie-recipes/mealie:v3.8.0
-        ports:
-        - containerPort: 9000
-        envFrom:
-        - configMapRef:
-            name: mealie-configmap
-        - secretRef:
-            name: mealie-secrets
-        volumeMounts:
-        - name: data
-          mountPath: /app/data
+        - name: mealie
+          image: ghcr.io/mealie-recipes/mealie:v3.8.0
+          ports:
+            - containerPort: 9000
+          envFrom:
+            - configMapRef:
+                name: mealie-configmap
+            - secretRef:
+                name: mealie-secrets
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
       volumes:
-      - name: data
-        persistentVolumeClaim:
-          claimName: mealie-data
+        - name: data
+          persistentVolumeClaim:
+            claimName: mealie-data
