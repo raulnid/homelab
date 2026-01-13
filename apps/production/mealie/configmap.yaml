@@ -2,6 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: mealie-configmap
+  namespace: mealie
 data:
   BASE_URL: "https://mealie.xzr.es"
   ALLOW_SIGNUP: "false"
