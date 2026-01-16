@@ -3,10 +3,9 @@ kind: Service
 metadata:
   name: wireguard
   namespace: wireguard
-  annotations:
-    metallb.universe.tf/loadBalancerIPs: ${WG_SERVICE_IP}
 spec:
   type: LoadBalancer
+  loadBalancerIP: ${WG_SERVICE_IP}
   externalTrafficPolicy: Local
   ports:
     - port: 51822
