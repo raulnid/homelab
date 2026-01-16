@@ -6,7 +6,6 @@ metadata:
 spec:
   type: LoadBalancer
   loadBalancerIP: ${WG_SERVICE_IP}
-  externalTrafficPolicy: Local
   ports:
     - port: 51822
       targetPort: 51822
