@@ -12,6 +12,16 @@ spec:
             static_configs:
               - targets: ['wireguard.wireguard.svc:9100']
             metrics_path: /metrics
+      prometheus:
+        prometheusSpec:
+          storageSpec:
+            volumeClaimTemplate:
+              spec:
+                storageClassName: local-path
+                accessModes: ["ReadWriteOnce"]
+                resources:
+                  requests:
+                    storage: 20Gi
     grafana:
       ingress:
         enabled: true
@@ -21,5 +31,6 @@ spec:
         path: /
       persistence:
         enabled: true
+        storageClassName: local-path
         size: 10Gi
         accessModes: ["ReadWriteOnce"]
