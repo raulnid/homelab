@@ -29,6 +29,12 @@ spec:
                 requests:
                   storage: 20Gi
     grafana:
+      initChownData:
+        enabled: false
+      podSecurityContext:
+        runAsUser: 472
+        runAsGroup: 472
+        fsGroup: 472
       ingress:
         enabled: true
         ingressClassName: nginx
