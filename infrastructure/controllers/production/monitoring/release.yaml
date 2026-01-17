@@ -5,23 +5,29 @@ metadata:
   namespace: monitoring
 spec:
   values:
+    nodeExporter:
+      serviceMonitor:
+        relabelings:
+          - action: replace
+            sourceLabels: [__meta_kubernetes_node_name]
+            targetLabel: instance
     prometheus:
       prometheusSpec:
         additionalScrapeConfigs:
           - job_name: 'vps-node-exporter'
             static_configs:
               - targets: ['wireguard.wireguard.svc:9100']
+                labels:
+                  instance: 'Gateway VPS'
             metrics_path: /metrics
-      prometheus:
-        prometheusSpec:
-          storageSpec:
-            volumeClaimTemplate:
-              spec:
-                storageClassName: local-path
-                accessModes: ["ReadWriteOnce"]
-                resources:
-                  requests:
-                    storage: 20Gi
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: local-path
+              accessModes: ["ReadWriteOnce"]
+              resources:
+                requests:
+                  storage: 20Gi
     grafana:
       ingress:
         enabled: true
