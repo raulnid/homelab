@@ -6,6 +6,7 @@ metadata:
 spec:
   interval: 10m
   timeout: 15m
+  
   chart:
     spec:
       chart: authentik
@@ -14,22 +15,28 @@ spec:
         kind: HelmRepository
         name: authentik
         namespace: flux-system
+  
   values:
     global:
       podAnnotations:
         fluxcd.io/automated: "true"
+    
     authentik:
       log_level: info
       postgresql:
         host: "192.168.1.11"
         name: "authentik"
         user: "authentik"
+        password: ""
+      secret_key: ""
+    
     postgresql:
       enabled: false
+    
     redis:
       enabled: true
       image:
-        tag: "7.4"
+        tag: "7.4.2-debian-12-r0"
       architecture: standalone
       auth:
         enabled: false
@@ -38,13 +45,19 @@ spec:
           enabled: true
           storageClass: "local-path"
           size: 1Gi
+    
     server:
       replicas: 1
-      envFrom:
-        - secretRef:
-            name: authentik-secret
+    
     worker:
       replicas: 1
-      envFrom:
-        - secretRef:
-            name: authentik-secret
+  
+  valuesFrom:
+    - kind: Secret
+      name: authentik-secret
+      valuesKey: AUTHENTIK_SECRET_KEY
+      targetPath: authentik.secret_key
+    - kind: Secret
+      name: authentik-secret
+      valuesKey: AUTHENTIK_POSTGRESQL__PASSWORD
+      targetPath: authentik.postgresql.password
