@@ -10,6 +10,7 @@ spec:
       version: "4.9.1"
   values:
     controller:
+      allowSnippetAnnotations: true
       replicaCount: 4
       service:
         type: LoadBalancer
