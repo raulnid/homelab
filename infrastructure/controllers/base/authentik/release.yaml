@@ -33,6 +33,10 @@ spec:
     
     redis:
       enabled: true
+      image:
+        registry: docker.io
+        repository: bitnami/redis
+        tag: "8.0"
       architecture: standalone
       auth:
         enabled: false
