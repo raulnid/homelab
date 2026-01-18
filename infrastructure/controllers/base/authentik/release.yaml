@@ -14,29 +14,22 @@ spec:
         kind: HelmRepository
         name: authentik
         namespace: flux-system
-      interval: 10m
   values:
     global:
       podAnnotations:
         fluxcd.io/automated: "true"
     authentik:
       log_level: info
-      error_reporting:
-        enabled: false
       postgresql:
         host: "192.168.1.11"
-        port: 5432
         name: "authentik"
         user: "authentik"
-      redis:
-        host: "authentik-redis-master"
-        port: 6379
     postgresql:
       enabled: false
     redis:
       enabled: true
       image:
-        tag: "7.4.2-debian-12-r0"
+        tag: "7.4"
       architecture: standalone
       auth:
         enabled: false
