@@ -5,6 +5,7 @@ metadata:
   namespace: authentik
 spec:
   interval: 10m
+  timeout: 15m
   chart:
     spec:
       chart: authentik
@@ -24,14 +25,33 @@ spec:
       valuesKey: AUTHENTIK_POSTGRESQL__PASSWORD
       targetPath: authentik.postgresql.password
   values:
+    global:
+      podAnnotations:
+        fluxcd.io/automated: "true"
     authentik:
+      log_level: info
+      error_reporting:
+        enabled: false
       postgresql:
         host: "192.168.1.11"
-        user: "authentik"
+        port: 5432
         name: "authentik"
+        user: "authentik"
+      redis:
+        host: "authentik-redis-master"
+        port: 6379
     postgresql:
       enabled: false
     redis:
       enabled: true
+      architecture: standalone
       auth:
         enabled: false
+      master:
+        persistence:
+          enabled: true
+          size: 1Gi
+    server:
+      replicas: 1
+    worker:
+      replicas: 1
