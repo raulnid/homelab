@@ -50,6 +50,7 @@ spec:
       master:
         persistence:
           enabled: true
+          storageClass: local-path
           size: 1Gi
     server:
       replicas: 1
