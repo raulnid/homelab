@@ -15,6 +15,8 @@ spec:
         namespace: nginx-ingress
   values:
     controller:
-      use-forwarded-headers: "true"
-      compute-full-forwarded-for: "true"
-      use-proxy-protocol: "false"
+      config:
+        use-forwarded-headers: "true"
+        compute-full-forwarded-for: "true"
+        use-proxy-protocol: "false"
+
