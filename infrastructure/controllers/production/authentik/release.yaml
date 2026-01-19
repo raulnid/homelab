@@ -20,6 +20,11 @@ spec:
         annotations:
           nginx.ingress.kubernetes.io/ssl-redirect: "false"
           nginx.ingress.kubernetes.io/proxy-body-size: "0"
+          nginx.ingress.kubernetes.io/enable-access-log: "true"
+          nginx.ingress.kubernetes.io/configuration-snippet: |
+            more_set_headers "X-Debug-Host: $host";
+            more_set_headers "X-Debug-Scheme: $scheme";
+            more_set_headers "X-Debug-Request-URI: $request_uri";
         hosts:
           - auth.xzr.es
     
