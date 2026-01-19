@@ -9,6 +9,11 @@ spec:
       version: "2024.10.5"
   values:
     server:
+      env:
+        - name: AUTHENTIK_ALLOWED_HOSTS
+          value: "auth.xzr.es"
+        - name: AUTHENTIK_CSRF_TRUSTED_ORIGINS
+          value: "https://auth.xzr.es"
       ingress:
         enabled: true
         ingressClassName: nginx
