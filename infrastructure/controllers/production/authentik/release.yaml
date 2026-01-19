@@ -14,6 +14,10 @@ spec:
           value: "auth.xzr.es"
         - name: AUTHENTIK_CSRF_TRUSTED_ORIGINS
           value: "https://auth.xzr.es"
+        - name: AUTHENTIK_DEBUG
+          value: "true"
+        - name: AUTHENTIK_COOKIE_DOMAIN
+          value: "auth.xzr.es"
       ingress:
         enabled: true
         ingressClassName: nginx
