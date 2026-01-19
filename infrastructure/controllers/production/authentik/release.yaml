@@ -13,7 +13,7 @@ spec:
         - name: AUTHENTIK_ALLOWED_HOSTS
           value: "auth.xzr.es"
         - name: AUTHENTIK_CSRF_TRUSTED_ORIGINS
-          value: "https://auth.xzr.es"
+          value: "http://auth.xzr.es,https://auth.xzr.es"
         - name: AUTHENTIK_DEBUG
           value: "true"
         - name: AUTHENTIK_COOKIE_DOMAIN
