@@ -8,16 +8,24 @@ spec:
     spec:
       version: "2024.10.5"
   values:
+    authentik:
+      # Ensure log level is set for visibility
+      log_level: info
     server:
+      # Environment variables for proxy and CSRF handling
       env:
         - name: AUTHENTIK_CSRF_TRUSTED_ORIGINS
           value: "https://auth.xzr.es"
         - name: AUTHENTIK_LISTEN__TRUSTED_PROXY_CIDRS
           value: "0.0.0.0/0"
+        - name: AUTHENTIK_COOKIE_DOMAIN
+          value: "auth.xzr.es"
+      # Ingress configuration
       ingress:
         enabled: true
         ingressClassName: nginx
         annotations:
+          # SSL offloading is handled by the reverse proxy/ingress
           nginx.ingress.kubernetes.io/ssl-redirect: "false"
           nginx.ingress.kubernetes.io/proxy-body-size: "0"
         hosts:
