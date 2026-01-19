@@ -10,6 +10,7 @@ spec:
   values:
     authentik:
       log_level: info
+      authentik_host: "https://auth.xzr.es"
     server:
       env:
         - name: AUTHENTIK_ALLOWED_HOSTS
