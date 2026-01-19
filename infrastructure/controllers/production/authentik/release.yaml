@@ -10,10 +10,10 @@ spec:
   values:
     server:
       env:
-        - name: AUTHENTIK_ALLOWED_HOSTS
-          value: "auth.xzr.es"
         - name: AUTHENTIK_CSRF_TRUSTED_ORIGINS
-          value: "http://auth.xzr.es,https://auth.xzr.es"
+          value: "https://auth.xzr.es"
+        - name: AUTHENTIK_LISTEN__TRUSTED_PROXY_CIDRS
+          value: "0.0.0.0/0"
       ingress:
         enabled: true
         ingressClassName: nginx
