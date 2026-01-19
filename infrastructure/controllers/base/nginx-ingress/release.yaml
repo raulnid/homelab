@@ -13,10 +13,5 @@ spec:
         kind: HelmRepository
         name: nginx-ingress
         namespace: nginx-ingress
-  values:
-    controller:
-      config:
-        use-forwarded-headers: "true"
-        compute-full-forwarded-for: "true"
-        use-proxy-protocol: "false"
+
 
