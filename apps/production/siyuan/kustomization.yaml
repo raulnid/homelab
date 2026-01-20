@@ -6,3 +6,4 @@ resources:
   - ../../base/siyuan
   - configmap.yaml
   - ingress.yaml
+  - outpost.yaml
