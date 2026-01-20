@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: authentik-proxy-outpost
+  namespace: siyuan
+spec:
+  selector:
+    app: authentik-proxy-outpost
+  ports:
+  - name: http
+    port: 9000
+    targetPort: 9000
+  - name: metrics
+    port: 9300
+    targetPort: 9300
