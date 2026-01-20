@@ -5,3 +5,9 @@ resources:
   - ../../base/mealie
   - configmap.yaml
   - ingress.yaml
+
+patches:
+  - path: deployment.yaml
+    target:
+      kind: Deployment
+      name: mealie
