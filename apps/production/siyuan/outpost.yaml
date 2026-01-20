@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authentik-proxy-outpost
+  namespace: siyuan
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: authentik-proxy-outpost
+  template:
+    metadata:
+      labels:
+        app: authentik-proxy-outpost
+    spec:
+      containers:
+      - name: proxy
+        image: ghcr.io/goauthentik/proxy:2024.10.5
+        env:
+        - name: AUTHENTIK_HOST
+          value: "https://auth.xzr.es"
+        - name: AUTHENTIK_HOST_BROWSER
+          value: "https://auth.xzr.es"
+        - name: AUTHENTIK_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: authentik-outpost-token
+              key: token
+        - name: AUTHENTIK_INSECURE
+          value: "false"
+        ports:
+        - containerPort: 9000
+          name: http
+        - containerPort: 9300
+          name: metrics
