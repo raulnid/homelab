@@ -2,8 +2,8 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: siyuan
 resources:
+  - auth
   - namespace.yaml
   - ../../base/siyuan
   - configmap.yaml
   - ingress.yaml
-  - outpost.yaml
