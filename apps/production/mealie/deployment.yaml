@@ -3,4 +3,4 @@ kind: Deployment
 metadata:
   name: mealie
 spec:
-  replicas: 2
+  replicas: 1
