@@ -13,12 +13,14 @@ spec:
             targetLabel: instance
     prometheus:
       prometheusSpec:
+        nodeSelector:
+          monitoring-storage: "true"
         additionalScrapeConfigs:
-          - job_name: 'vps-node-exporter'
+          - job_name: "vps-node-exporter"
             static_configs:
-              - targets: ['wireguard.wireguard.svc:9100']
+              - targets: ["wireguard.wireguard.svc:9100"]
                 labels:
-                  instance: 'Gateway VPS'
+                  instance: "Gateway VPS"
             metrics_path: /metrics
         storageSpec:
           volumeClaimTemplate:
@@ -29,6 +31,8 @@ spec:
                 requests:
                   storage: 20Gi
     grafana:
+      nodeSelector:
+        monitoring-storage: "true"
       initChownData:
         enabled: false
       podSecurityContext:
