@@ -4,7 +4,7 @@ namespace: mealie
 resources:
   - ../../base/mealie
   - configmap.yaml
-  - ingress.yaml
+  - httproute.yaml
 
 patches:
   - path: deployment.yaml

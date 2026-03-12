@@ -40,11 +40,7 @@ spec:
         runAsGroup: 472
         fsGroup: 472
       ingress:
-        enabled: true
-        ingressClassName: nginx
-        hosts:
-          - stats.xzr.es
-        path: /
+        enabled: false
       persistence:
         enabled: true
         storageClassName: local-path
