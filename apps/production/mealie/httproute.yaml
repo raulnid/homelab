@@ -5,8 +5,8 @@ metadata:
   namespace: mealie
 spec:
   parentRefs:
-  - name: nginx-gateway
-    namespace: nginx-gateway
+  - name: cilium-gateway
+    namespace: kube-system
   hostnames:
   - "mealie.xzr.es"
   rules:

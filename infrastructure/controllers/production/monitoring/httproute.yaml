@@ -5,8 +5,8 @@ metadata:
   namespace: monitoring
 spec:
   parentRefs:
-  - name: nginx-gateway
-    namespace: nginx-gateway
+  - name: cilium-gateway
+    namespace: kube-system
   hostnames:
   - "stats.xzr.es"
   rules:
