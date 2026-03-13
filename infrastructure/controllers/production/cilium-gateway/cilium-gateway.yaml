@@ -5,6 +5,9 @@ metadata:
   namespace: kube-system
 spec:
   gatewayClassName: cilium
+  addresses:
+  - value: 192.168.1.240
+    type: IPAddress
   listeners:
   - name: http
     port: 80
