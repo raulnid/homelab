@@ -5,3 +5,4 @@ resources:
   - storageclass.yaml
   - vault-internal-cert.yaml
   - helmrelease.yaml
+  - namespace.yaml
