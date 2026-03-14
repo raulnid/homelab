@@ -4,3 +4,4 @@ resources:
   - helmrepo.yaml
   - helmrelease.yaml
   - internal-issuer.yaml
+  - namespace.yaml
