@@ -1,0 +1,17 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: vault-internal-tls
+  namespace: openbao
+spec:
+  secretName: vault-internal-tls
+  issuerRef:
+    name: internal-ca-issuer
+    kind: ClusterIssuer
+  dnsNames:
+  - openbao-openbao-0.openbao-openbao-internal.openbao.svc.cluster.local
+  - openbao-openbao-1.openbao-openbao-internal.openbao.svc.cluster.local
+  - openbao-openbao-2.openbao-openbao-internal.openbao.svc.cluster.local
+  - openbao-openbao-internal.openbao.svc.cluster.local
+  - openbao-openbao.openbao.svc.cluster.local
+  - localhost

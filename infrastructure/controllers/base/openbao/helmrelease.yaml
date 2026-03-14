@@ -1,0 +1,122 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: openbao
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: cert-manager
+      namespace: cert-manager
+  interval: 10m
+  targetNamespace: openbao
+  chart:
+    spec:
+      chart: openbao
+      version: ">=0.1.0"
+      sourceRef:
+        kind: HelmRepository
+        name: openbao
+        namespace: flux-system
+  install:
+    createNamespace: true
+  upgrade:
+    force: true
+  values:
+    server:
+      updateStrategyType: RollingUpdate
+      annotations:
+        reloader.stakater.com/auto: "true"
+      podAnnotations: {}
+      image:
+        repository: openbao/openbao
+        tag: "2.4.4"
+
+      hostNetwork: false
+      
+      extraEnvironmentVars:
+        BAO_ADDR: https://127.0.0.1:8200
+        BAO_API_ADDR: https://$(POD_IP):8200
+        BAO_SKIP_VERIFY: "true"
+      
+      service:
+        enabled: true
+        port: 8200
+        targetPort: 8200
+
+      dataStorage:
+        enabled: true
+        size: 10Gi
+        storageClass: "local-storage"
+
+      volumes:
+        - name: unseal-key
+          secret:
+            secretName: openbao-unseal
+        - name: vault-internal-tls
+          secret:
+            secretName: vault-internal-tls
+      volumeMounts:
+        - name: unseal-key
+          mountPath: /openbao/config/seal
+          readOnly: true
+        - name: vault-internal-tls
+          mountPath: /openbao/config/tls/internal
+          readOnly: true
+
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+
+      ha:
+        enabled: true
+        replicas: 3
+        raft:
+          enabled: true
+          setNodeId: true
+          config: |
+            ui = true
+
+            audit "file" {
+              path = "file"
+              type = "file"
+              options = {
+                file_path = "/dev/stdout" # Alloy will get them automatically
+              }
+            }
+            
+            listener "tcp" {
+              address       = "0.0.0.0:8200"
+              tls_disable   = 0
+              tls_cert_file = "/openbao/config/tls/internal/tls.crt"
+              tls_key_file  = "/openbao/config/tls/internal/tls.key"
+            }
+
+            listener "tcp" {
+              address     = "0.0.0.0:8080"
+              tls_disable = 1
+            }
+
+            storage "raft" {
+              path = "/openbao/data"
+              retry_join {
+                leader_api_addr = "https://openbao-openbao-0.openbao-openbao-internal:8200"
+                leader_ca_cert_file = "/openbao/config/tls/internal/ca.crt"
+              }
+              retry_join {
+                leader_api_addr = "https://openbao-openbao-1.openbao-openbao-internal:8200"
+                leader_ca_cert_file = "/openbao/config/tls/internal/ca.crt"
+              }
+              retry_join {
+                leader_api_addr = "https://openbao-openbao-2.openbao-openbao-internal:8200"
+                leader_ca_cert_file = "/openbao/config/tls/internal/ca.crt"
+              }
+            }
+
+            api_addr     = "https://$(HOSTNAME).openbao-openbao-internal:8200"
+            cluster_addr = "https://$(HOSTNAME).openbao-openbao-internal:8201"
+
+            seal "static" {
+              current_key_id = "unsealkey-2026"
+              current_key    = "file:///openbao/config/seal/unseal.key"
+            }
