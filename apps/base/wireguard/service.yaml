@@ -3,9 +3,10 @@ kind: Service
 metadata:
   name: wireguard
   namespace: wireguard
+  annotations:
+    io.cilium/lb-ipam-ips: ${WG_SERVICE_IP}
 spec:
   type: LoadBalancer
-  loadBalancerIP: ${WG_SERVICE_IP}
   ports:
     - port: 51822
       targetPort: 51822

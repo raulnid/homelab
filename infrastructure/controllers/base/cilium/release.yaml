@@ -29,8 +29,10 @@ spec:
     gatewayAPI:
       enabled: true
     kubeProxyReplacement: true
-    lbIPAM:
-      enabled: false
+    l2announcements:
+      enabled: true
+    externalIPs:
+      enabled: true
     encryption:
       enabled: true
       type: ipsec
