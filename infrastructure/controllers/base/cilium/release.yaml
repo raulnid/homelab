@@ -31,6 +31,8 @@ spec:
     kubeProxyReplacement: true
     l2announcements:
       enabled: true
+    l2NeighDiscovery:
+      enabled: true
     externalIPs:
       enabled: true
     encryption:
