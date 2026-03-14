@@ -97,21 +97,21 @@ spec:
             storage "raft" {
               path = "/openbao/data"
               retry_join {
-                leader_api_addr = "https://openbao-openbao-0.openbao-openbao-internal:8200"
+                leader_api_addr = "https://openbao-openbao-0.openbao-openbao-internal.openbao.svc.cluster.local:8200"
                 leader_ca_cert_file = "/openbao/config/tls/internal/ca.crt"
               }
               retry_join {
-                leader_api_addr = "https://openbao-openbao-1.openbao-openbao-internal:8200"
+                leader_api_addr = "https://openbao-openbao-1.openbao-openbao-internal.openbao.svc.cluster.local:8200"
                 leader_ca_cert_file = "/openbao/config/tls/internal/ca.crt"
               }
               retry_join {
-                leader_api_addr = "https://openbao-openbao-2.openbao-openbao-internal:8200"
+                leader_api_addr = "https://openbao-openbao-2.openbao-openbao-internal.openbao.svc.cluster.local:8200"
                 leader_ca_cert_file = "/openbao/config/tls/internal/ca.crt"
               }
             }
 
-            api_addr     = "https://$(HOSTNAME).openbao-openbao-internal:8200"
-            cluster_addr = "https://$(HOSTNAME).openbao-openbao-internal:8201"
+            api_addr     = "https://$(HOSTNAME).openbao-openbao-internal.openbao.svc.cluster.local:8200"
+            cluster_addr = "https://$(HOSTNAME).openbao-openbao-internal.openbao.svc.cluster.local:8201"
 
             seal "static" {
               current_key_id = "unsealkey-2026"
