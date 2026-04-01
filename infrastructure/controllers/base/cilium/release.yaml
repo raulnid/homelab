@@ -4,31 +4,24 @@ metadata:
   name: cilium
   namespace: kube-system
 spec:
-  interval: 30m
+  interval: 1h
   chart:
     spec:
       chart: cilium
-      version: '1.19.1'
+      version: "1.19.2"
       sourceRef:
         kind: HelmRepository
         name: cilium
         namespace: flux-system
-  install:
-    crds: CreateReplace
-    remediation:
-      retries: 3
-  upgrade:
-    crds: CreateReplace
-    remediation:
-      retries: 3
   values:
-    ipam:
-      mode: kubernetes
     routingMode: tunnel
     tunnelProtocol: vxlan
+    ipam:
+      mode: kubernetes
+    mtu: 1400
+    kubeProxyReplacement: true
     gatewayAPI:
       enabled: true
-    kubeProxyReplacement: true
     l2announcements:
       enabled: true
     l2NeighDiscovery:
@@ -49,3 +42,9 @@ spec:
             enabled: true
     operator:
       replicas: 1
+    hubble:
+      enabled: true
+      relay:
+        enabled: true
+      ui:
+        enabled: true

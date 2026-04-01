@@ -3,5 +3,4 @@ kind: Kustomization
 resources:
   - repository.yaml
   - release.yaml
-  - ippool.yaml
-  - l2policy.yaml
+  - mtls.yaml

@@ -1,0 +1,40 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: harbor
+  namespace: harbor
+spec:
+  values:
+    externalURL: http://hub.xzr.es
+    harborAdminPassword: Harbor@12345
+    persistence:
+      enabled: true
+      resourcePolicy: "keep"
+      persistentVolumeClaim:
+        registry:
+          storageClass: "local-storage"
+          accessMode: ReadWriteOnce
+          size: 30Gi
+        jobservice:
+          jobLog:
+            storageClass: "local-storage"
+            accessMode: ReadWriteOnce
+            size: 1Gi
+        database:
+          storageClass: "local-storage"
+          accessMode: ReadWriteOnce
+          size: 5Gi
+        redis:
+          storageClass: "local-storage"
+          accessMode: ReadWriteOnce
+          size: 1Gi
+        trivy:
+          storageClass: "local-storage"
+          accessMode: ReadWriteOnce
+          size: 5Gi
+    registry:
+      relativeurls: true
+    nginx:
+      clientMaxBodySize: 0
+    nodeSelector:
+      kubernetes.io/hostname: node2

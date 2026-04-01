@@ -1,0 +1,35 @@
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: require-mtls-v2
+spec:
+  endpointSelector:
+    matchExpressions:
+      - key: io.kubernetes.pod.namespace
+        operator: NotIn
+        values:
+          [kube-system, cilium-spire, cilium-gateway, cert-manager, flux-system]
+  ingress:
+    # Rule 1. mTLS only for apps.
+    - authentication:
+        mode: required
+      fromEndpoints:
+        - matchExpressions:
+            - key: io.kubernetes.pod.namespace
+              operator: NotIn
+              values: [kube-system, cilium-spire, cilium-gateway, flux-system]
+            # This lets pods with tags get into here
+            - key: "io.kubernetes.pod.name"
+              operator: Exists
+
+    # Rule 2. Let Infra and Gateway in. (without mTLS)
+    - fromEndpoints:
+        - matchExpressions:
+            - key: io.kubernetes.pod.namespace
+              operator: In
+              values: [kube-system, cilium-gateway]
+      fromEntities:
+        - ingress # Cilium Ingress/Gateway identity.
+        - host # Local processes.
+        - remote-node
+        - kube-apiserver
