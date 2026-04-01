@@ -6,3 +6,4 @@ resources:
   - monitoring
   - cert-manager
   - openbao
+  - harbor
