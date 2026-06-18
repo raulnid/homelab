@@ -1,10 +1,36 @@
+---
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: harbor
   namespace: harbor
 spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: harbor
+      version: "1.14.x"
+      sourceRef:
+        kind: HelmRepository
+        name: harbor
+        namespace: harbor
+      interval: 12h
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
   values:
+    expose:
+      type: clusterIP
+      tls:
+        enabled: false
+    database:
+      type: internal
+    redis:
+      type: internal
     externalURL: http://hub.xzr.es
     harborAdminPassword: Harbor@12345
     persistence:

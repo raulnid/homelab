@@ -1,0 +1,62 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kube-prometheus-stack
+  namespace: monitoring
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: kube-prometheus-stack
+      version: "81.x"
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus-community
+        namespace: flux-system
+      interval: 10m
+  values:
+    grafana:
+      enabled: true
+      nodeSelector:
+        monitoring-storage: "true"
+      initChownData:
+        enabled: false
+      podSecurityContext:
+        runAsUser: 472
+        runAsGroup: 472
+        fsGroup: 472
+      ingress:
+        enabled: false
+      persistence:
+        enabled: true
+        storageClassName: local-path
+        size: 10Gi
+        accessModes: ["ReadWriteOnce"]
+    prometheus:
+      enabled: true
+      prometheusSpec:
+        nodeSelector:
+          monitoring-storage: "true"
+        additionalScrapeConfigs:
+          - job_name: "vps-node-exporter"
+            static_configs:
+              - targets: ["wireguard.wireguard.svc:9100"]
+                labels:
+                  instance: "Gateway VPS"
+            metrics_path: /metrics
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: local-path
+              accessModes: ["ReadWriteOnce"]
+              resources:
+                requests:
+                  storage: 20Gi
+    alertmanager:
+      enabled: true
+    nodeExporter:
+      serviceMonitor:
+        relabelings:
+          - action: replace
+            sourceLabels: [__meta_kubernetes_node_name]
+            targetLabel: instance

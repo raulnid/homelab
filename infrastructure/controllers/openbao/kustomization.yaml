@@ -7,3 +7,5 @@ resources:
   - helmrelease.yaml
   - helmrepo.yaml
   - namespace.yaml
+  - httproute.yaml
+  - service-http.yaml

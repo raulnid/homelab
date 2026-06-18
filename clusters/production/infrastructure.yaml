@@ -5,7 +5,7 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m # Check for changes every 10 minuts
-  path: ./infrastructure/controllers/production
+  path: ./infrastructure/controllers
   prune: true # Automatically remove objects deleted from Git
   sourceRef:
     kind: GitRepository
