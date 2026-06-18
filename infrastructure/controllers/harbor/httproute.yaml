@@ -16,7 +16,7 @@ spec:
     - matches:
         - path:
             type: PathPrefix
-            value: /
+            value: "/"
       backendRefs:
         - name: harbor
           port: 80
