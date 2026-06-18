@@ -5,15 +5,15 @@ metadata:
   namespace: siyuan
 spec:
   parentRefs:
-  - name: cilium-gateway
-    namespace: kube-system
+    - name: cilium-gateway
+      namespace: kube-system
   hostnames:
-  - "siyuan.xzr.es"
+    - "siyuan.xzr.es"
   rules:
-  - matches:
-    - path:
-        type: PathPrefix
-        value: "/"
-    backendRefs:
-    - name: siyuan
-      port: 80
+    - matches:
+        - path:
+            type: PathPrefix
+            value: "/"
+      backendRefs:
+        - name: siyuan
+          port: 80
