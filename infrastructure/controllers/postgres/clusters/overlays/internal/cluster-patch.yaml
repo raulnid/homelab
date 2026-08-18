@@ -1,0 +1,23 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: pg
+spec:
+  instances: 3
+  # certificates:
+  #   serverTLSSecret: pg-server-tls
+  #   serverCASecret: pg-server-ca
+  #   replicationTLSSecret: pg-replica-tls
+  storage:
+    size: 10Gi
+    storageClass: postgres-local
+
+  enableSuperuserAccess: true
+
+  affinity:
+    podAntiAffinityType: required
+    topologyKey: kubernetes.io/hostname
+    tolerations:
+      - key: node-role.kubernetes.io/control-plane
+        operator: Exists
+        effect: NoSchedule
