@@ -7,3 +7,6 @@ resources:
   - cert-manager
   - openbao
   - harbor
+  - reloader
+#  - step-ca
+  - postgres
