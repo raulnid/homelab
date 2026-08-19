@@ -12,6 +12,11 @@ spec:
       labels:
         app: wireguard
     spec:
+      nodeSelector:
+        kubernetes.io/hostname: node1
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          effect: NoSchedule
       containers:
         - name: wireguard
           image: ghcr.io/linuxserver/wireguard:latest
