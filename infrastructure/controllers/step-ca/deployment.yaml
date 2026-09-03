@@ -1,0 +1,127 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: step-ca
+  namespace: step-ca
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: step-ca
+  template:
+    metadata:
+      labels:
+        app: step-ca
+    spec:
+      serviceAccountName: step-ca
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        fsGroup: 1000
+      initContainers:
+        - name: render-config
+          image: cr.step.sm/smallstep/step-ca:0.29.0
+          command:
+            - sh
+            - -c
+            - |
+              esc() { printf '%s' "$1" | sed -e 's/[\\&#]/\\&/g'; }
+              sed \
+                -e "s#__DB_USER__#$(esc "$DB_USER")#g" \
+                -e "s#__DB_PASSWORD__#$(esc "$DB_PASSWORD")#g" \
+                /config-template/ca.json > /config/ca.json
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+          env:
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: step-ca-db
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: step-ca-db
+                  key: password
+          volumeMounts:
+            - name: config-template
+              mountPath: /config-template
+              readOnly: true
+            - name: config
+              mountPath: /config
+      containers:
+        - name: step-ca
+          image: cr.step.sm/smallstep/step-ca:0.29.0
+          command: ["step-ca"]
+          args:
+            - "/home/step/config/ca.json"
+            - "--password-file=/home/step/secrets/password"
+          ports:
+            - containerPort: 9000
+              name: https
+          env:
+            - name: STEPPATH
+              value: /home/step
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 9000
+              scheme: HTTPS
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 9000
+              scheme: HTTPS
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+          volumeMounts:
+            - name: config
+              mountPath: /home/step/config
+              readOnly: true
+            - name: certs
+              mountPath: /home/step/certs
+              readOnly: true
+            - name: secrets
+              mountPath: /home/step/secrets
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: config-template
+          configMap:
+            name: step-ca-config
+        - name: config
+          emptyDir: {}
+        - name: certs
+          secret:
+            secretName: step-ca-pki
+            items:
+              - key: root_ca.crt
+                path: root_ca.crt
+              - key: intermediate_ca.crt
+                path: intermediate_ca.crt
+        - name: secrets
+          secret:
+            secretName: step-ca-pki
+            items:
+              - key: intermediate_ca_key
+                path: intermediate_ca_key
+              - key: password
+                path: password
+        - name: tmp
+          emptyDir: {}

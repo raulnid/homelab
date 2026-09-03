@@ -5,8 +5,9 @@ resources:
   - cilium-gateway
   - monitoring
   - cert-manager
+  - external-secrets
   - openbao
   - harbor
   - reloader
-#  - step-ca
+  - step-ca
   - postgres
