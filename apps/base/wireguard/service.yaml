@@ -9,7 +9,7 @@ spec:
   type: LoadBalancer
   ports:
     - port: 51822
-      targetPort: 51822
+      targetPort: ${WG_CLIENT_PORT}
       protocol: UDP
       name: wireguard
     - port: 9100
