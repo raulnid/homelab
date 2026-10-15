@@ -1,0 +1,21 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: step-ca-issuer
+spec:
+  acme:
+    email: admin@xzr.es
+    server: https://cert.xzr.es/acme/acme/directory
+    privateKeySecretRef:
+      name: step-ca-issuer-account-key
+    caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUJ4RENDQVdxZ0F3SUJBZ0lSQUpDSlNqcER5UUp3ZGZOTW9TY3l1Tjh3Q2dZSUtvWkl6ajBFQXdJd1FERWEKTUJnR0ExVUVDaE1SVTNSbGNDQkRaWEowYVdacFkyRjBaWE14SWpBZ0JnTlZCQU1UR1ZOMFpYQWdRMlZ5ZEdsbQphV05oZEdWeklGSnZiM1FnUTBFd0hoY05Nall3TnpBME1UUXlOekF3V2hjTk16WXdOekF4TVRReU56QXdXakJBCk1Sb3dHQVlEVlFRS0V4RlRkR1Z3SUVObGNuUnBabWxqWVhSbGN6RWlNQ0FHQTFVRUF4TVpVM1JsY0NCRFpYSjAKYVdacFkyRjBaWE1nVW05dmRDQkRRVEJaTUJNR0J5cUdTTTQ5QWdFR0NDcUdTTTQ5QXdFSEEwSUFCQldNMjRGcAozcTgySHZXUk1BTkRBR3NOTmZkZStZUHpXRUtsTW80V3VXakV3ejJSdzFYZHVpU1l0aWJLbnZJc2dZbG5FWFlKCjVjMWFZMlVFRXFKSHU1S2pSVEJETUE0R0ExVWREd0VCL3dRRUF3SUJCakFTQmdOVkhSTUJBZjhFQ0RBR0FRSC8KQWdFQk1CMEdBMVVkRGdRV0JCUzJMZDlzM3M3TmZZS1E1UVBsSGU4MnYwZEZMekFLQmdncWhrak9QUVFEQWdOSQpBREJGQWlBcVZmUWhvSjFmTkpuSXV2SWl3bkx4LzlUM0Jyc3JBYmdFRVhLZHNFZXNOQUloQVBpSmxpOTRxMklBCktRUG5xQlo0b0hLdlEzMzJxU0RZUzlQcU16YlROYTZSCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+    solvers:
+    - dns01:
+        webhook:
+          groupName: acme.xzr.es
+          solverName: pdns
+          config:
+            host: http://powerdns-auth-api.powerdns.svc.cluster.local:8081
+            apiKeySecretRef:
+              name: powerdns-api-key
+              key: api-key

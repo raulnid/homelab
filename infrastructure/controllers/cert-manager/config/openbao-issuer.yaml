@@ -1,0 +1,97 @@
+---
+# Dedicated SA so cert-manager authenticates against OpenBao via K8s auth.
+# The controller asks for a token via the TokenRequest API and swaps it for a
+# Vault one against the "cert-manager" role in auth/kubernetes.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cert-manager-openbao
+  namespace: cert-manager
+---
+# cert-manager-controller needs permission to create tokens for the SA above.
+# Without this, serviceAccountRef in the ClusterIssuer gives "forbidden".
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: cert-manager-openbao-tokenrequest
+  namespace: cert-manager
+rules:
+- apiGroups: [""]
+  resources: ["serviceaccounts/token"]
+  resourceNames: ["cert-manager-openbao"]
+  verbs: ["create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: cert-manager-openbao-tokenrequest
+  namespace: cert-manager
+subjects:
+# Name of the cert-manager controller SA — double check with
+# `kubectl -n cert-manager get sa`. The chart default is "cert-manager".
+- kind: ServiceAccount
+  name: cert-manager
+  namespace: cert-manager
+roleRef:
+  kind: Role
+  name: cert-manager-openbao-tokenrequest
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: openbao-pg-replica
+spec:
+  vault:
+    server: https://openbao-openbao.openbao.svc.cluster.local:8200
+    path: pki/sign/postgres-streaming-replica-client
+    caBundleSecretRef:
+      name: internal-ca-tls
+      key: tls.crt
+    auth:
+      kubernetes:
+        mountPath: /v1/auth/kubernetes
+        role: cert-manager
+        serviceAccountRef:
+          name: cert-manager-openbao
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: openbao-pg-client
+spec:
+  vault:
+    server: https://openbao-openbao.openbao.svc.cluster.local:8200
+    path: pki/sign/postgres-client
+    caBundleSecretRef:
+      name: internal-ca-tls
+      key: tls.crt
+    auth:
+      kubernetes:
+        mountPath: /v1/auth/kubernetes
+        role: cert-manager
+        serviceAccountRef:
+          name: cert-manager-openbao
+---
+# Generic issuer for SERVER certs issued by OpenBao's PKI.
+# Uses the pki/roles/server role (server_flag, ext_key_usage=ServerAuth).
+# Unlike step-ca-issuer (ACME), the resulting secret includes ca.crt
+# (OpenBao's intermediate), so there's nothing to combine.
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: openbao-server
+spec:
+  vault:
+    server: https://openbao-openbao.openbao.svc.cluster.local:8200
+    path: pki/sign/server
+    caBundleSecretRef:
+      name: internal-ca-tls
+      key: tls.crt
+    auth:
+      kubernetes:
+        mountPath: /v1/auth/kubernetes
+        role: cert-manager
+        serviceAccountRef:
+          name: cert-manager-openbao
+
