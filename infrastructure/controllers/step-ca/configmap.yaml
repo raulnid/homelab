@@ -30,13 +30,12 @@ data:
             "key": {
               "use": "sig",
               "kty": "EC",
-              "kid": "EA8KD-R8teeh9OmHxtLVrRNThADJtrkynNzQ7PNIlPk",
+              "kid": "g0tTGTRRYT8i8rAx5eRgB0qWCDo3jo1TITsQl9slm1I",
               "crv": "P-256",
               "alg": "ES256",
-              "x": "IhedN2kSfe4JkVNuU16Imj1EEuCfuUYCZDD3oQoSmEY",
-              "y": "tSLz9QOV7kh9eKMDjUB6bBUQZZwvndgRCE7O2ZvAqMI"
-            },
-            "encryptedKey": "eyJhbGciOiJQQkVTMi1IUzI1NitBMTI4S1ciLCJjdHkiOiJqd2sranNvbiIsImVuYyI6IkEyNTZHQ00iLCJwMmMiOjEwMDAwMCwicDJzIjoia0VJOVJZOXVyb1ZfRWpUZWkyZ2JDUSJ9.TDe12IOv_G8nlq_Aw97_TUJL-6rVL_8rSwCuInAOC-aDR2ncpu-OIA.sSQe7dekDSbXmAlE.OfNv8AjW0dsxRyZU0gVDUIZ4T_YfSYGABZ8Of7Z_Xm4TsTzi3CJOx2awUVCMtymGv5zj_Gs9prVFsLXv3dOchUBUXpSBbSfyCvKi1js-eyR3TwJUN0B9n_W4JrNa22C-GxQfuhlAybfutya_XnjU-5oTV-VsT8NiYLlOqifEB0Nl07eOHzjhuWwcKw4YuEmpqO0z-GVxnaPjKyV5YaZkFNN43oCiesV8nRe4XCvBQaI-PtD1aNr8uCB0GHTWCvO6WeemiLhHR636LtkkLH9XR5XEIfLwKF6REGDcI6PwdWWUJe63l4xxH2cGoyin3O0SP3vZOD2CzM1K6iCQRIk.kiiOFwQJvxHAZO8nt3IbyQ"
+              "x": "ilqVJxk4U5mF8OWYgnrfc3pm1w7Jcbhd6fQHYD6iWAk",
+              "y": "QhK6a0REnWlL81LUjrDMgXW4GS_5BFbJXjrY126719w"
+            }
           }
         ],
         "template": {},
