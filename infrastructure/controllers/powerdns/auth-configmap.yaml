@@ -1,0 +1,38 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: powerdns-auth-config
+  namespace: powerdns
+data:
+  pdns.conf: |
+    # PowerDNS Authoritative Server Configuration
+    
+    # Backend settings
+    launch=gpgsql
+    #gpgsql-dnssec=yes
+
+    # API and Webserver settings
+    api=yes
+    webserver=yes
+    webserver-address=0.0.0.0
+    webserver-port=8081
+    webserver-allow-from=192.168.1.0/24,10.244.0.0/16,127.0.0.0/8
+
+    # Performance and Network
+    local-address=0.0.0.0
+    local-port=1053
+    reuseport=yes
+
+    # Security and Zone Transfers
+    allow-axfr-ips=192.168.1.0/24,10.244.0.0/16
+    
+    # SOA Defaults
+    default-soa-content=ns1.xzr.es hostmaster.xzr.es 0 10800 3600 604800 3600
+
+    # Logging
+    loglevel=4
+    log-dns-queries=no
+
+    # Container Execution (Must be 'no' for Kubernetes/Docker)
+    daemon=no

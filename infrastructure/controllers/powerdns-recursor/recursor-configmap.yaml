@@ -1,0 +1,49 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: powerdns-recursor-config
+  namespace: powerdns
+data:
+  recursor.yml: |
+    incoming:
+      listen:
+        - 0.0.0.0
+      port: 1053
+      allow_from:
+        - 10.0.0.0/8
+        - 172.16.0.0/12
+        - 192.168.0.0/16
+        - 127.0.0.0/8
+
+    recursor:
+      daemon: false
+      # Forward xzr.es queries to our Authoritative Server
+      forward_zones:
+        - zone: xzr.es
+          forwarders:
+            - powerdns-auth-dns.powerdns.svc.cluster.local
+        - zone: cluster.local
+          forwarders:
+            - 10.96.0.10
+        - zone: local
+          forwarders:
+            - 10.96.0.10
+        - zone: .
+          forwarders:
+            - 1.1.1.1
+      # Enable system resolver so hostnames in forwarders are resolved via CoreDNS
+      system_resolver_ttl: 60
+      threads: 2
+  
+    dnssec:
+      validation: 'off'
+
+    logging:
+      loglevel: 4
+
+    packetcache:
+      disable: true
+
+    recordcache:
+      max_entries: 0

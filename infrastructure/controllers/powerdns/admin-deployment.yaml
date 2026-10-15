@@ -1,0 +1,136 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: powerdns-admin
+  namespace: powerdns
+  labels:
+    app.kubernetes.io/name: powerdns-admin
+    app.kubernetes.io/component: web-panel
+    app.kubernetes.io/part-of: powerdns
+  annotations:
+    # Restart the pod when the password (static role) or the client cert (24h) rotates.
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: powerdns-admin
+      app.kubernetes.io/part-of: powerdns
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: powerdns-admin
+        app.kubernetes.io/component: web-panel
+        net/to-cnpg-internal: "true"
+        app.kubernetes.io/part-of: powerdns
+        net/from-public-gw: "true"
+    spec:
+      securityContext:
+        # libpq wants the key with restricted permissions: root-owned 0640 with
+        # readable group passes the check, so the (non-root) process can read it.
+        fsGroup: 953
+      containers:
+        - name: powerdns-admin
+          image: powerdnsadmin/pda-legacy:latest
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          env:
+            # Connection to external PostgreSQL (separate database for PDA)
+            - name: PG_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: powerdns-secret
+                  key: host
+            - name: PG_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: powerdns-secret
+                  key: port
+            - name: PDA_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: powerdns-db-creds
+                  key: user
+            - name: PDA_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: powerdns-db-creds
+                  key: pass
+            - name: PDA_DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: powerdns-secret
+                  key: database
+            - name: SQLALCHEMY_DATABASE_URI
+              # verify-ca: same reason as pdns-auth: host through the K8s Service
+              # (DNS bootstrap) and the server cert only has SANs for another domain.
+              value: "postgresql://$(PDA_DB_USER):$(PDA_DB_PASSWORD)@$(PG_HOST):$(PG_PORT)/$(PDA_DB_NAME)?sslmode=verify-ca&sslrootcert=/etc/pda/ssl-ca/ca.crt&sslcert=/etc/pda/ssl/tls.crt&sslkey=/etc/pda/ssl/tls.key"
+            # Connection to the PowerDNS Auth API
+            - name: PDNS_API_URL
+              value: "http://powerdns-auth-api.powerdns.svc.cluster.local:8081"
+            - name: PDNS_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: powerdns-secret
+                  key: api_key
+            - name: PDNS_VERSION
+              value: "4.9.0"
+          resources:
+            requests:
+              cpu: 50m
+              memory: 256Mi
+            limits:
+              memory: 1Gi
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+          volumeMounts:
+            - name: db-tls
+              mountPath: /etc/pda/ssl
+              readOnly: true
+            - name: db-ca
+              mountPath: /etc/pda/ssl-ca
+              readOnly: true
+      volumes:
+        - name: db-tls
+          secret:
+            # defaultMode is the permissions in DECIMAL (NOT OCTAL), 416 would be 640 in octal.
+            defaultMode: 416
+            secretName: powerdns-pg-tls
+        - name: db-ca
+          secret:
+            secretName: powerdns-pg-ca
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: powerdns-admin
+  namespace: powerdns
+  labels:
+    app.kubernetes.io/name: powerdns-admin
+    app.kubernetes.io/component: web-panel
+    app.kubernetes.io/part-of: powerdns
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: powerdns-admin
+    app.kubernetes.io/part-of: powerdns

@@ -1,0 +1,8 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: cert-manager-webhook-pdns
+  namespace: flux-system
+spec:
+  interval: 24h
+  url: https://zachomedia.github.io/cert-manager-webhook-pdns

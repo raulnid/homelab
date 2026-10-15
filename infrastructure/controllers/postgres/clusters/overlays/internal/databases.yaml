@@ -8,3 +8,23 @@ spec:
   owner: cnpg_admin
   cluster:
     name: pg
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: dns
+spec:
+  name: dns
+  owner: cnpg_admin
+  cluster:
+    name: pg
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: authentik
+spec:
+  name: authentik
+  owner: cnpg_admin
+  cluster:
+    name: pg
