@@ -1,0 +1,82 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: valkey
+  namespace: valkey
+spec:
+  interval: 10m0s
+  chart:
+    spec:
+      chart: valkey
+      version: "0.11.0" # Latest stable chart version
+      sourceRef:
+        kind: HelmRepository
+        name: valkey
+        namespace: valkey
+      interval: 1h
+  values:
+    auth:
+      enabled: true
+      # the reason static passwords are used is that
+      # valkey rewrites the passwords on every pod reset,
+      # so if openbao rotates them and they get changed again externally
+      # openbao loses track; this way the passwords are always the same
+      # and the cert is what changes every 24 hours
+      usersExistingSecret: vk-users
+      aclUsers:
+        default:
+          permissions: "~* &* +@all"
+        auth:
+          permissions: "~* &* +@all"
+
+    replica:
+      enabled: true
+      replicas: 2
+      disklessSync: false
+      persistence:
+        size: "5Gi"
+    tls:
+      enabled: true
+      # cert secret with issuer openbao-server, ca.crt from the root CA
+      # carries serverAuth + clientAuth for server + replicas
+      existingSecret: vk-server-tls
+      serverPublicKey: tls.crt
+      serverKey: tls.key
+      caPublicKey: ca.crt
+      # part of the reason for static passwords: openbao's valkey (and redis) plugin
+      # has no client certificate support, which is a security problem,
+      # so it's simply better to drop the weak piece and keep mTLS
+      requireClientCertificate: true
+    metrics:
+      enabled: true
+      exporter:
+        # exporter connects without tls, rediss:// forces tls, skip verification
+        # because it's intra-pod traffic, the hostname isn't valid and it's not worth
+        # routing it out to the gateway and back in. mTLS mounted
+        # in extraVolumeMounts
+        extraEnvs:
+          REDIS_ADDR: "rediss://localhost:6379"
+          REDIS_EXPORTER_SKIP_TLS_VERIFICATION: "true"
+          REDIS_EXPORTER_TLS_CLIENT_CERT_FILE: "/tls/tls.crt"
+          REDIS_EXPORTER_TLS_CLIENT_KEY_FILE: "/tls/tls.key"
+        extraVolumeMounts:
+          - name: valkey-tls
+            mountPath: /tls
+            readOnly: true
+      serviceMonitor:
+        enabled: true
+        # the probes are hardcoded without tls, the chart is patched manually to add
+        # --cert and --key for probes with mTLS and avoid problems with requireClientCertificates
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              kind: StatefulSet
+              name: valkey
+            patch: |
+              - op: replace
+                path: /spec/template/spec/containers/0/startupProbe/exec/command
+                value: ["sh", "-c", "valkey-cli --cacert /tls/ca.crt --cert /tls/tls.crt --key /tls/tls.key --tls ping"]
+              - op: replace
+                path: /spec/template/spec/containers/0/livenessProbe/exec/command
+                value: ["sh", "-c", "valkey-cli --cacert /tls/ca.crt --cert /tls/tls.crt --key /tls/tls.key --tls ping"]

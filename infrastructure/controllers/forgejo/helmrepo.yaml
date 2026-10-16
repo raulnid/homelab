@@ -1,0 +1,13 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: forgejo
+  namespace: forgejo
+spec:
+  # The Forgejo chart is only published as an OCI artifact (no HTTPS repo).
+  # Flux appends the chart name (spec.chart.spec.chart) to this URL, so
+  # only the OCI namespace goes here; the final chart is forgejo-helm/forgejo:<version>.
+  type: oci
+  interval: 1h
+  url: oci://code.forgejo.org/forgejo-helm

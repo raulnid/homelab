@@ -1,0 +1,118 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: forgejo
+  namespace: forgejo
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: forgejo
+      version: "17.1.7"
+      sourceRef:
+        kind: HelmRepository
+        name: forgejo
+        namespace: forgejo
+      interval: 12h
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  # WATCH OUT gitea/forgejo chart: deployment.labels ALSO ends up in
+  # spec.selector.matchLabels (immutable field) -> breaks the upgrade of the
+  # existing Deployment. Cilium net/* labels go only on the pod template via
+  # post-render; the selector stays name+instance (valid subset)
+  # and the pod keeps net/from-public-gw (apps-ingress-from-public-gateway)
+  # and net/to-authentik (apps-egress-to-authentik).
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              kind: Deployment
+              name: forgejo
+            patch: |
+              apiVersion: apps/v1
+              kind: Deployment
+              metadata:
+                name: forgejo
+              spec:
+                template:
+                  metadata:
+                    labels:
+                      net/from-public-gw: "true"
+                      net/to-authentik: "true"
+  values:
+    replicaCount: 1
+
+    persistence:
+      enabled: true
+      create: true
+      mount: true
+      accessModes:
+        - ReadWriteOnce
+      size: 10Gi
+      claimName: forgejo-pvc
+      # TODO(tune): with no-provisioner the PVC stays Pending until a matching
+      # local PV exists. Create one like harbor/local-pv.yaml (hostPath on
+      # /mnt/... + nodeAffinity to the chosen node) and keep this storageClass.
+      storageClass: local-storage
+
+    tolerations:
+      - key: node-role.kubernetes.io/control-plane
+        operator: Exists
+        effect: NoSchedule
+
+    # Exposed through Gateway API (HTTPRoute -> cilium-gateway), not through Ingress.
+    ingress:
+      enabled: false
+
+    securityContext:
+      fsGroup: 1000
+      runAsNonRoot: true
+      runAsUser: 1000
+      runAsGroup: 1000
+
+    extraVolumes:
+      - name: internal-ca
+        secret:
+          secretName: forgejo-internal-ca # key ca.crt (ESO from k8s/step-ca)
+
+    extraContainerVolumeMounts:
+      - name: internal-ca
+        mountPath: /etc/forgejo/ca
+        readOnly: true
+
+    deployment:
+      # DON'T put the net/* labels here: this chart copies deployment.labels to
+      # spec.selector.matchLabels (immutable). They go through postRenderers (above).
+      env:
+        - name: SSL_CERT_DIR
+          value: /etc/ssl/certs:/etc/forgejo/ca
+
+    gitea:
+      config:
+        APP_NAME: "Git Server"
+        server:
+          DOMAIN: git.xzr.es
+          ROOT_URL: https://git.xzr.es/
+          SSH_DOMAIN: git.xzr.es
+
+      metrics:
+        enabled: true
+        serviceMonitor:
+          enabled: true
+          namespace: "monitoring"
+
+      service:
+        ENABLE_OPENID_SINGIN: true
+        ENABLE_OPENID_SINGUP: true
+
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        memory: 1Gi
