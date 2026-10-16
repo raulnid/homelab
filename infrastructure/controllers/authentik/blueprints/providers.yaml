@@ -1,0 +1,285 @@
+version: 1
+metadata:
+  name: 'homelab: providers'
+entries:
+- model: authentik_providers_oauth2.oauth2provider
+  state: present
+  identifiers:
+    name: Provider for Forgejo
+  attrs:
+    access_code_validity: minutes=1
+    access_token_validity: minutes=5
+    authentication_flow: null
+    authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+    client_id: S6Yv5qaOFVsBzRjg8ZXqwlhBpNMprjMJ5MJNyyQm
+    client_secret: !Env 'AUTHENTIK_PROVIDER_SECRET_FORGEJO'
+    client_type: confidential
+    encryption_key: null
+    grant_types:
+    - authorization_code
+    - implicit
+    - hybrid
+    - refresh_token
+    - client_credentials
+    - password
+    - urn:ietf:params:oauth:grant-type:device_code
+    include_claims_in_id_token: true
+    invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+    issuer_mode: per_provider
+    jwt_federation_providers: []
+    jwt_federation_sources: []
+    logout_method: backchannel
+    logout_uri: ''
+    name: Provider for Forgejo
+    property_mappings:
+    - !Find [authentik_providers_oauth2.scopemapping, [name, 'authentik default OAuth Mapping: OpenID ''openid''']]
+    - !Find [authentik_providers_oauth2.scopemapping, [name, 'authentik default OAuth Mapping: OpenID ''email''']]
+    - !Find [authentik_providers_oauth2.scopemapping, [name, 'authentik default OAuth Mapping: OpenID ''profile''']]
+    redirect_uris:
+    - matching_mode: strict
+      redirect_uri_type: authorization
+      url: https://git.xzr.es/user/oauth2/Authentik/callback
+    refresh_token_threshold: hours=1
+    refresh_token_validity: days=30
+    signing_key: !Find [authentik_crypto.certificatekeypair, [name, authentik Self-signed Certificate]]
+    sub_mode: hashed_user_id
+- model: authentik_providers_oauth2.oauth2provider
+  state: present
+  identifiers:
+    name: Provider for OpenBao
+  attrs:
+    access_code_validity: minutes=1
+    access_token_validity: minutes=5
+    authentication_flow: null
+    authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+    client_id: 5wc1uQ7S9wF5GxcybPckQqPLtcrygVByyd2j0bKO
+    client_secret: !Env 'AUTHENTIK_PROVIDER_SECRET_OPENBAO'
+    client_type: confidential
+    encryption_key: null
+    grant_types:
+    - authorization_code
+    - implicit
+    - hybrid
+    - refresh_token
+    - client_credentials
+    - password
+    - urn:ietf:params:oauth:grant-type:device_code
+    include_claims_in_id_token: true
+    invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+    issuer_mode: per_provider
+    jwt_federation_providers: []
+    jwt_federation_sources: []
+    logout_method: backchannel
+    logout_uri: ''
+    name: Provider for OpenBao
+    property_mappings:
+    - !Find [authentik_providers_oauth2.scopemapping, [name, 'authentik default OAuth Mapping: OpenID ''openid''']]
+    - !Find [authentik_providers_oauth2.scopemapping, [name, 'authentik default OAuth Mapping: OpenID ''email''']]
+    - !Find [authentik_providers_oauth2.scopemapping, [name, 'authentik default OAuth Mapping: OpenID ''profile''']]
+    redirect_uris:
+    - matching_mode: strict
+      redirect_uri_type: authorization
+      url: https://vault.xzr.es/ui/vault/auth/oidc/oidc/callback
+    - matching_mode: strict
+      redirect_uri_type: authorization
+      url: http://localhost:8250/oidc/callback
+    refresh_token_threshold: hours=1
+    refresh_token_validity: days=30
+    signing_key: !Find [authentik_crypto.certificatekeypair, [name, authentik Self-signed Certificate]]
+    sub_mode: hashed_user_id
+- model: authentik_providers_oauth2.oauth2provider
+  state: present
+  identifiers:
+    name: Provider for Grafana
+  attrs:
+    access_code_validity: minutes=1
+    access_token_validity: minutes=5
+    authentication_flow: null
+    authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+    client_id: mIr7eDVDhDscRrMIshwTH6fVhrG9kybB8D4naAxN
+    client_secret: !Env 'AUTHENTIK_PROVIDER_SECRET_GRAFANA'
+    client_type: confidential
+    encryption_key: null
+    grant_types:
+    - authorization_code
+    - implicit
+    - hybrid
+    - refresh_token
+    - client_credentials
+    - password
+    - urn:ietf:params:oauth:grant-type:device_code
+    include_claims_in_id_token: true
+    invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+    issuer_mode: per_provider
+    jwt_federation_providers: []
+    jwt_federation_sources: []
+    logout_method: backchannel
+    logout_uri: ''
+    name: Provider for Grafana
+    property_mappings:
+    - !Find [authentik_providers_oauth2.scopemapping, [name, 'authentik default OAuth Mapping: OpenID ''openid''']]
+    - !Find [authentik_providers_oauth2.scopemapping, [name, 'authentik default OAuth Mapping: OpenID ''email''']]
+    - !Find [authentik_providers_oauth2.scopemapping, [name, 'authentik default OAuth Mapping: OpenID ''profile''']]
+    redirect_uris:
+    - matching_mode: strict
+      redirect_uri_type: authorization
+      url: https://stats.xzr.es/login/generic_oauth
+    refresh_token_threshold: hours=1
+    refresh_token_validity: days=30
+    signing_key: !Find [authentik_crypto.certificatekeypair, [name, authentik Self-signed Certificate]]
+    sub_mode: hashed_user_id
+- model: authentik_providers_oauth2.oauth2provider
+  state: present
+  identifiers:
+    name: Provider for Harbor
+  attrs:
+    access_code_validity: minutes=1
+    access_token_validity: minutes=5
+    authentication_flow: null
+    authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+    client_id: r2eERKMiLP65L3vfyuytY3mYzJ6cY3m672CT0qRt
+    client_secret: !Env 'AUTHENTIK_PROVIDER_SECRET_HARBOR'
+    client_type: confidential
+    encryption_key: null
+    grant_types:
+    - authorization_code
+    - implicit
+    - hybrid
+    - refresh_token
+    - client_credentials
+    - password
+    - urn:ietf:params:oauth:grant-type:device_code
+    include_claims_in_id_token: true
+    invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+    issuer_mode: per_provider
+    jwt_federation_providers: []
+    jwt_federation_sources: []
+    logout_method: backchannel
+    logout_uri: ''
+    name: Provider for Harbor
+    property_mappings:
+    - !Find [authentik_providers_oauth2.scopemapping, [name, 'authentik default OAuth Mapping: OpenID ''openid''']]
+    - !Find [authentik_providers_oauth2.scopemapping, [name, 'authentik default OAuth Mapping: OpenID ''email''']]
+    - !Find [authentik_providers_oauth2.scopemapping, [name, 'authentik default OAuth Mapping: OpenID ''profile''']]
+    - !Find [authentik_providers_oauth2.scopemapping, [name, 'authentik default OAuth Mapping: OpenID ''offline_access''']]
+    redirect_uris:
+    - matching_mode: strict
+      redirect_uri_type: authorization
+      url: https://hub.xzr.es/c/oidc/callback
+    refresh_token_threshold: hours=1
+    refresh_token_validity: days=30
+    signing_key: !Find [authentik_crypto.certificatekeypair, [name, authentik Self-signed Certificate]]
+    sub_mode: hashed_user_id
+- model: authentik_providers_oauth2.oauth2provider
+  state: present
+  identifiers:
+    name: Provider for Hubble
+  attrs:
+    access_code_validity: minutes=1
+    access_token_validity: hours=24
+    authentication_flow: null
+    authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+    client_id: AMUCGaSWaO1qk7ZdKIz3dDTWapvZjxr6kPyuSwlA
+    client_secret: !Env 'AUTHENTIK_PROVIDER_SECRET_HUBBLE'
+    client_type: confidential
+    encryption_key: null
+    grant_types:
+    - authorization_code
+    - client_credentials
+    - password
+    include_claims_in_id_token: true
+    invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+    issuer_mode: per_provider
+    jwt_federation_providers: []
+    jwt_federation_sources: []
+    logout_method: backchannel
+    logout_uri: ''
+    name: Provider for Hubble
+    property_mappings:
+    - !Find [authentik_providers_oauth2.scopemapping, [name, 'authentik default OAuth Mapping: Proxy outpost']]
+    - !Find [authentik_providers_oauth2.scopemapping, [name, 'authentik default OAuth Mapping: OpenID ''openid''']]
+    - !Find [authentik_providers_oauth2.scopemapping, [name, 'authentik default OAuth Mapping: OpenID ''email''']]
+    - !Find [authentik_providers_oauth2.scopemapping, [name, 'authentik default OAuth Mapping: OpenID ''profile''']]
+    - !Find [authentik_providers_oauth2.scopemapping, [name, 'authentik default OAuth Mapping: Application Entitlements']]
+    redirect_uris:
+    - matching_mode: strict
+      redirect_uri_type: authorization
+      url: https://hubble.xzr.es/outpost.goauthentik.io/callback?X-authentik-auth-callback=true
+    - matching_mode: strict
+      redirect_uri_type: authorization
+      url: https://hubble.xzr.es?X-authentik-auth-callback=true
+    refresh_token_threshold: seconds=0
+    refresh_token_validity: days=30
+    signing_key: null
+    sub_mode: hashed_user_id
+- model: authentik_providers_proxy.proxyprovider
+  state: present
+  identifiers:
+    name: Provider for Hubble
+  attrs:
+    access_token_validity: hours=24
+    authentication_flow: null
+    authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+    basic_auth_enabled: false
+    basic_auth_password_attribute: ''
+    basic_auth_user_attribute: ''
+    certificate: null
+    cookie_domain: ''
+    external_host: https://hubble.xzr.es
+    intercept_header_auth: true
+    internal_host: http://hubble-ui.kube-system.svc.cluster.local:80
+    internal_host_ssl_validation: true
+    invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+    jwt_federation_providers: []
+    jwt_federation_sources: []
+    mode: proxy
+    name: Provider for Hubble
+    property_mappings:
+    - !Find [authentik_providers_oauth2.scopemapping, [name, 'authentik default OAuth Mapping: Proxy outpost']]
+    - !Find [authentik_providers_oauth2.scopemapping, [name, 'authentik default OAuth Mapping: OpenID ''openid''']]
+    - !Find [authentik_providers_oauth2.scopemapping, [name, 'authentik default OAuth Mapping: OpenID ''email''']]
+    - !Find [authentik_providers_oauth2.scopemapping, [name, 'authentik default OAuth Mapping: OpenID ''profile''']]
+    - !Find [authentik_providers_oauth2.scopemapping, [name, 'authentik default OAuth Mapping: Application Entitlements']]
+    refresh_token_validity: days=30
+    skip_path_regex: ''
+- model: authentik_providers_oauth2.oauth2provider
+  state: present
+  identifiers:
+    name: Provider for Jenkins
+  attrs:
+    access_code_validity: minutes=1
+    access_token_validity: minutes=5
+    authentication_flow: null
+    authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+    client_id: KTNEMu39bXajpR0AOIBPit2znfmhen6B1XN1Ij6g
+    client_secret: !Env 'AUTHENTIK_PROVIDER_SECRET_JENKINS'
+    client_type: confidential
+    encryption_key: null
+    grant_types:
+    - authorization_code
+    - implicit
+    - hybrid
+    - refresh_token
+    - client_credentials
+    - password
+    - urn:ietf:params:oauth:grant-type:device_code
+    include_claims_in_id_token: true
+    invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+    issuer_mode: per_provider
+    jwt_federation_providers: []
+    jwt_federation_sources: []
+    logout_method: backchannel
+    logout_uri: ''
+    name: Provider for Jenkins
+    property_mappings:
+    - !Find [authentik_providers_oauth2.scopemapping, [name, 'authentik default OAuth Mapping: OpenID ''openid''']]
+    - !Find [authentik_providers_oauth2.scopemapping, [name, 'authentik default OAuth Mapping: OpenID ''email''']]
+    - !Find [authentik_providers_oauth2.scopemapping, [name, 'authentik default OAuth Mapping: OpenID ''profile''']]
+    redirect_uris:
+    - matching_mode: strict
+      redirect_uri_type: authorization
+      url: https://jenkins.xzr.es/securityRealm/finishLogin
+    refresh_token_threshold: hours=1
+    refresh_token_validity: days=30
+    signing_key: !Find [authentik_crypto.certificatekeypair, [name, authentik Self-signed Certificate]]
+    sub_mode: hashed_user_id

@@ -1,0 +1,60 @@
+version: 1
+metadata:
+  name: 'homelab: groups'
+entries:
+- model: authentik_core.group
+  state: present
+  identifiers:
+    name: Grafana Admins
+  attrs:
+    attributes: {}
+    is_superuser: false
+    name: Grafana Admins
+- model: authentik_core.group
+  state: present
+  identifiers:
+    name: Grafana Editors
+  attrs:
+    attributes: {}
+    is_superuser: false
+    name: Grafana Editors
+- model: authentik_core.group
+  state: present
+  identifiers:
+    name: OpenBao Admins
+  attrs:
+    attributes: {}
+    is_superuser: false
+    name: OpenBao Admins
+- model: authentik_core.group
+  state: present
+  identifiers:
+    name: Harbor Admins
+  attrs:
+    attributes: {}
+    is_superuser: false
+    name: Harbor Admins
+- model: authentik_core.group
+  state: present
+  identifiers:
+    name: Forgejo Developer
+  attrs:
+    attributes: {}
+    is_superuser: false
+    name: Forgejo Developer
+- model: authentik_core.group
+  state: present
+  identifiers:
+    name: Forgejo Owner
+  attrs:
+    attributes: {}
+    is_superuser: false
+    name: Forgejo Owner
+- model: authentik_core.group
+  state: present
+  identifiers:
+    name: Jenkins Admins
+  attrs:
+    attributes: {}
+    is_superuser: false
+    name: Jenkins Admins

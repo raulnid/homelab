@@ -1,0 +1,457 @@
+version: 1
+metadata:
+  name: 'homelab: stages'
+entries:
+- model: authentik_stages_prompt.prompt
+  state: present
+  identifiers:
+    name: initial-setup-field-base-url
+  attrs:
+    field_key: base_url
+    initial_value: return request.http_request.build_absolute_uri("/").rstrip("/")
+    initial_value_expression: true
+    label: Base URL
+    name: initial-setup-field-base-url
+    order: 400
+    placeholder: https://authentik.company
+    placeholder_expression: false
+    required: true
+    sub_text: Configure the base URL under which this authentik instance is reachable, e.g. https://authentik.company. Do not include any path component (for example, /authentik).
+    type: text
+- model: authentik_stages_prompt.prompt
+  state: present
+  identifiers:
+    name: initial-setup-field-header
+  attrs:
+    field_key: oobe-header-text
+    initial_value: Welcome to authentik! Please set a password and email address for the default admin user, akadmin.
+    initial_value_expression: false
+    label: oobe-header-text
+    name: initial-setup-field-header
+    order: 100
+    placeholder: ''
+    placeholder_expression: false
+    required: true
+    sub_text: ''
+    type: static
+- model: authentik_stages_prompt.prompt
+  state: present
+  identifiers:
+    name: initial-setup-field-email
+  attrs:
+    field_key: email
+    initial_value: ''
+    initial_value_expression: false
+    label: Email
+    name: initial-setup-field-email
+    order: 101
+    placeholder: Admin email
+    placeholder_expression: false
+    required: true
+    sub_text: ''
+    type: email
+- model: authentik_stages_prompt.prompt
+  state: present
+  identifiers:
+    name: initial-setup-field-password
+  attrs:
+    field_key: password
+    initial_value: ''
+    initial_value_expression: false
+    label: Password
+    name: initial-setup-field-password
+    order: 300
+    placeholder: Password
+    placeholder_expression: false
+    required: true
+    sub_text: ''
+    type: password
+- model: authentik_stages_prompt.prompt
+  state: present
+  identifiers:
+    name: initial-setup-field-password-repeat
+  attrs:
+    field_key: password_repeat
+    initial_value: ''
+    initial_value_expression: false
+    label: Password (repeat)
+    name: initial-setup-field-password-repeat
+    order: 301
+    placeholder: Password (repeat)
+    placeholder_expression: false
+    required: true
+    sub_text: ''
+    type: password
+- model: authentik_stages_prompt.prompt
+  state: present
+  identifiers:
+    name: default-user-settings-field-username
+  attrs:
+    field_key: username
+    initial_value: "try:\n    return user.username\nexcept:\n    return ''"
+    initial_value_expression: true
+    label: Username
+    name: default-user-settings-field-username
+    order: 200
+    placeholder: Username
+    placeholder_expression: false
+    required: true
+    sub_text: ''
+    type: username
+- model: authentik_stages_prompt.prompt
+  state: present
+  identifiers:
+    name: default-user-settings-field-name
+  attrs:
+    field_key: name
+    initial_value: "try:\n    return user.name\nexcept:\n    return ''"
+    initial_value_expression: true
+    label: Name
+    name: default-user-settings-field-name
+    order: 201
+    placeholder: Name
+    placeholder_expression: false
+    required: true
+    sub_text: ''
+    type: text
+- model: authentik_stages_prompt.prompt
+  state: present
+  identifiers:
+    name: default-user-settings-field-email
+  attrs:
+    field_key: email
+    initial_value: "try:\n    return user.email\nexcept:\n    return ''"
+    initial_value_expression: true
+    label: Email
+    name: default-user-settings-field-email
+    order: 202
+    placeholder: Email
+    placeholder_expression: false
+    required: true
+    sub_text: ''
+    type: email
+- model: authentik_stages_prompt.prompt
+  state: present
+  identifiers:
+    name: default-user-settings-field-locale
+  attrs:
+    field_key: attributes.settings.locale
+    initial_value: "try:\n    return user.attributes.get(\"settings\", {}).get(\"locale\", \"\")\nexcept:\n    return ''"
+    initial_value_expression: true
+    label: Locale
+    name: default-user-settings-field-locale
+    order: 203
+    placeholder: Locale
+    placeholder_expression: false
+    required: true
+    sub_text: ''
+    type: ak-locale
+- model: authentik_stages_prompt.prompt
+  state: present
+  identifiers:
+    name: default-password-change-field-password
+  attrs:
+    field_key: password
+    initial_value: ''
+    initial_value_expression: false
+    label: Password
+    name: default-password-change-field-password
+    order: 300
+    placeholder: Password
+    placeholder_expression: false
+    required: true
+    sub_text: ''
+    type: password
+- model: authentik_stages_prompt.prompt
+  state: present
+  identifiers:
+    name: default-password-change-field-password-repeat
+  attrs:
+    field_key: password_repeat
+    initial_value: ''
+    initial_value_expression: false
+    label: Password (repeat)
+    name: default-password-change-field-password-repeat
+    order: 301
+    placeholder: Password (repeat)
+    placeholder_expression: false
+    required: true
+    sub_text: ''
+    type: password
+- model: authentik_stages_prompt.prompt
+  state: present
+  identifiers:
+    name: default-source-enrollment-field-username
+  attrs:
+    field_key: username
+    initial_value: ''
+    initial_value_expression: false
+    label: Username
+    name: default-source-enrollment-field-username
+    order: 100
+    placeholder: Username
+    placeholder_expression: false
+    required: true
+    sub_text: ''
+    type: username
+- model: authentik_stages_authenticator_static.authenticatorstaticstage
+  state: present
+  identifiers:
+    name: default-authenticator-static-setup
+  attrs:
+    configure_flow: !Find [authentik_flows.flow, [slug, default-authenticator-static-setup]]
+    friendly_name: Static tokens
+    name: default-authenticator-static-setup
+    token_count: 6
+    token_length: 12
+- model: authentik_stages_authenticator_totp.authenticatortotpstage
+  state: present
+  identifiers:
+    name: default-authenticator-totp-setup
+  attrs:
+    configure_flow: !Find [authentik_flows.flow, [slug, default-authenticator-totp-setup]]
+    digits: '6'
+    friendly_name: TOTP Device
+    name: default-authenticator-totp-setup
+- model: authentik_stages_authenticator_validate.authenticatorvalidatestage
+  state: present
+  identifiers:
+    name: authenticator_validation_stage
+  attrs:
+    configuration_stages:
+    - !Find [authentik_stages_authenticator_totp.authenticatortotpstage, [name, default-authenticator-totp-setup]]
+    device_classes:
+    - totp
+    email_otp_throttling_factor: 1.0
+    last_auth_threshold: seconds=0
+    name: authenticator_validation_stage
+    not_configured_action: configure
+    sms_otp_throttling_factor: 1.0
+    static_otp_throttling_factor: 1.0
+    totp_otp_throttling_factor: 1.0
+    webauthn_allowed_device_types: []
+    webauthn_hints: []
+    webauthn_user_verification: required
+- model: authentik_stages_authenticator_validate.authenticatorvalidatestage
+  state: present
+  identifiers:
+    name: default-authentication-mfa-validation
+  attrs:
+    configuration_stages:
+    - !Find [authentik_stages_authenticator_totp.authenticatortotpstage, [name, default-authenticator-totp-setup]]
+    device_classes:
+    - static
+    - totp
+    - webauthn
+    - duo
+    - sms
+    - email
+    email_otp_throttling_factor: 1.0
+    last_auth_threshold: seconds=0
+    name: default-authentication-mfa-validation
+    not_configured_action: configure
+    sms_otp_throttling_factor: 1.0
+    static_otp_throttling_factor: 1.0
+    totp_otp_throttling_factor: 1.0
+    webauthn_allowed_device_types: []
+    webauthn_hints: []
+    webauthn_user_verification: preferred
+- model: authentik_stages_authenticator_webauthn.authenticatorwebauthnstage
+  state: present
+  identifiers:
+    name: default-authenticator-webauthn-setup
+  attrs:
+    authenticator_attachment: null
+    configure_flow: !Find [authentik_flows.flow, [slug, default-authenticator-webauthn-setup]]
+    device_type_restrictions: []
+    friendly_name: WebAuthn device
+    hints: []
+    max_attempts: 0
+    name: default-authenticator-webauthn-setup
+    resident_key_requirement: preferred
+    user_verification: preferred
+- model: authentik_stages_consent.consentstage
+  state: present
+  identifiers:
+    name: default-provider-authorization-consent
+  attrs:
+    consent_expire_in: weeks=4
+    mode: expiring
+    name: default-provider-authorization-consent
+- model: authentik_stages_identification.identificationstage
+  state: present
+  identifiers:
+    name: identification_stage
+  attrs:
+    captcha_stage: null
+    case_insensitive_matching: true
+    enable_remember_me: false
+    enrollment_flow: null
+    name: identification_stage
+    password_stage: null
+    passwordless_flow: null
+    pretend_user_exists: true
+    recovery_flow: null
+    show_matched_user: true
+    show_source_labels: false
+    sources: []
+    user_fields:
+    - username
+    webauthn_stage: null
+- model: authentik_stages_identification.identificationstage
+  state: present
+  identifiers:
+    name: default-authentication-identification
+  attrs:
+    captcha_stage: null
+    case_insensitive_matching: true
+    enable_remember_me: false
+    enrollment_flow: null
+    name: default-authentication-identification
+    password_stage: null
+    passwordless_flow: null
+    pretend_user_exists: true
+    recovery_flow: null
+    show_matched_user: true
+    show_source_labels: false
+    sources: []
+    user_fields:
+    - email
+    - username
+    webauthn_stage: null
+- model: authentik_stages_password.passwordstage
+  state: present
+  identifiers:
+    name: default-authentication-password
+  attrs:
+    allow_show_password: false
+    backends:
+    - authentik.core.auth.InbuiltBackend
+    - authentik.sources.kerberos.auth.KerberosBackend
+    - authentik.sources.ldap.auth.LDAPBackend
+    - authentik.core.auth.TokenBackend
+    configure_flow: !Find [authentik_flows.flow, [slug, default-password-change]]
+    failed_attempts_before_cancel: 5
+    name: default-authentication-password
+- model: authentik_stages_prompt.promptstage
+  state: present
+  identifiers:
+    name: default-password-change-prompt
+  attrs:
+    fields:
+    - !Find [authentik_stages_prompt.prompt, [name, default-password-change-field-password]]
+    - !Find [authentik_stages_prompt.prompt, [name, default-password-change-field-password-repeat]]
+    name: default-password-change-prompt
+    validation_policies:
+    - !Find [authentik_policies_password.passwordpolicy, [name, default-password-change-password-policy]]
+- model: authentik_stages_prompt.promptstage
+  state: present
+  identifiers:
+    name: default-user-settings
+  attrs:
+    fields:
+    - !Find [authentik_stages_prompt.prompt, [name, default-user-settings-field-username]]
+    - !Find [authentik_stages_prompt.prompt, [name, default-user-settings-field-name]]
+    - !Find [authentik_stages_prompt.prompt, [name, default-user-settings-field-locale]]
+    - !Find [authentik_stages_prompt.prompt, [name, default-user-settings-field-email]]
+    name: default-user-settings
+    validation_policies:
+    - !Find [authentik_policies_expression.expressionpolicy, [name, default-user-settings-authorization]]
+- model: authentik_stages_prompt.promptstage
+  state: present
+  identifiers:
+    name: stage-default-oobe-password
+  attrs:
+    fields:
+    - !Find [authentik_stages_prompt.prompt, [name, initial-setup-field-password-repeat]]
+    - !Find [authentik_stages_prompt.prompt, [name, initial-setup-field-header]]
+    - !Find [authentik_stages_prompt.prompt, [name, initial-setup-field-password]]
+    - !Find [authentik_stages_prompt.prompt, [name, initial-setup-field-email]]
+    - !Find [authentik_stages_prompt.prompt, [name, initial-setup-field-base-url]]
+    name: stage-default-oobe-password
+    validation_policies:
+    - !Find [authentik_policies_expression.expressionpolicy, [name, default-oobe-base-url-valid]]
+- model: authentik_stages_prompt.promptstage
+  state: present
+  identifiers:
+    name: default-source-enrollment-prompt
+  attrs:
+    fields:
+    - !Find [authentik_stages_prompt.prompt, [name, default-source-enrollment-field-username]]
+    name: default-source-enrollment-prompt
+    validation_policies: []
+- model: authentik_stages_user_login.userloginstage
+  state: present
+  identifiers:
+    name: default-source-enrollment-login
+  attrs:
+    geoip_binding: no_binding
+    name: default-source-enrollment-login
+    network_binding: no_binding
+    remember_device: days=30
+    remember_me_offset: seconds=0
+    session_duration: seconds=0
+    terminate_other_sessions: false
+- model: authentik_stages_user_login.userloginstage
+  state: present
+  identifiers:
+    name: default-source-authentication-login
+  attrs:
+    geoip_binding: no_binding
+    name: default-source-authentication-login
+    network_binding: no_binding
+    remember_device: days=30
+    remember_me_offset: seconds=0
+    session_duration: seconds=0
+    terminate_other_sessions: false
+- model: authentik_stages_user_login.userloginstage
+  state: present
+  identifiers:
+    name: default-authentication-login
+  attrs:
+    geoip_binding: no_binding
+    name: default-authentication-login
+    network_binding: no_binding
+    remember_device: days=30
+    remember_me_offset: seconds=0
+    session_duration: seconds=0
+    terminate_other_sessions: false
+- model: authentik_stages_user_logout.userlogoutstage
+  state: present
+  identifiers:
+    name: default-invalidation-logout
+  attrs:
+    name: default-invalidation-logout
+- model: authentik_stages_user_write.userwritestage
+  state: present
+  identifiers:
+    name: default-password-change-write
+  attrs:
+    create_users_as_inactive: false
+    create_users_group: null
+    name: default-password-change-write
+    user_creation_mode: never_create
+    user_path_template: ''
+    user_type: external
+- model: authentik_stages_user_write.userwritestage
+  state: present
+  identifiers:
+    name: default-user-settings-write
+  attrs:
+    create_users_as_inactive: false
+    create_users_group: null
+    name: default-user-settings-write
+    user_creation_mode: never_create
+    user_path_template: ''
+    user_type: external
+- model: authentik_stages_user_write.userwritestage
+  state: present
+  identifiers:
+    name: default-source-enrollment-write
+  attrs:
+    create_users_as_inactive: false
+    create_users_group: null
+    name: default-source-enrollment-write
+    user_creation_mode: always_create
+    user_path_template: ''
+    user_type: external

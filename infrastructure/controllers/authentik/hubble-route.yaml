@@ -1,0 +1,25 @@
+---
+# HTTPRoute for Hubble UI. The backend is authentik-server (embedded outpost),
+# which authenticates and proxies to hubble-ui.kube-system:80. The Gateway never talks
+# to Hubble directly. The Proxy Provider config is done in the authentik WebUI.
+# Authentik (ver docs/superpowers/specs/2026-06-18-hubble-authentik-design.md).
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: hubble-route
+  namespace: authentik
+spec:
+  parentRefs:
+    - name: cilium-gateway
+      namespace: kube-system
+      sectionName: http
+  hostnames:
+    - "hubble.xzr.es"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: authentik-server
+          port: 80

@@ -1,0 +1,21 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: authentik-route
+  namespace: authentik
+spec:
+  parentRefs:
+    - name: cilium-gateway
+      namespace: kube-system
+      sectionName: http
+
+  hostnames:
+    - "auth.xzr.es"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: authentik-server
+          port: 80

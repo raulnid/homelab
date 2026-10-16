@@ -1,0 +1,246 @@
+version: 1
+metadata:
+  name: 'homelab: flow stage bindings'
+entries:
+- model: authentik_flows.flowstagebinding
+  state: present
+  identifiers:
+    target: !Find [authentik_flows.flow, [slug, default-provider-authorization-explicit-consent]]
+    stage: !Find [authentik_stages_consent.consentstage, [name, default-provider-authorization-consent]]
+    order: 0
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  state: present
+  identifiers:
+    target: !Find [authentik_flows.flow, [slug, initial-setup]]
+    stage: !Find [authentik_stages_prompt.promptstage, [name, stage-default-oobe-password]]
+    order: 10
+  attrs:
+    evaluate_on_plan: true
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: false
+- model: authentik_flows.flowstagebinding
+  state: present
+  identifiers:
+    target: !Find [authentik_flows.flow, [slug, initial-setup]]
+    stage: !Find [authentik_stages_user_write.userwritestage, [name, default-password-change-write]]
+    order: 20
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  state: present
+  identifiers:
+    target: !Find [authentik_flows.flow, [slug, initial-setup]]
+    stage: !Find [authentik_stages_user_login.userloginstage, [name, default-authentication-login]]
+    order: 100
+  attrs:
+    evaluate_on_plan: true
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: false
+- model: authentik_flows.flowstagebinding
+  state: present
+  identifiers:
+    target: !Find [authentik_flows.flow, [slug, stepup-otp]]
+    stage: !Find [authentik_stages_identification.identificationstage, [name, identification_stage]]
+    order: 10
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  state: present
+  identifiers:
+    target: !Find [authentik_flows.flow, [slug, stepup-otp]]
+    stage: !Find [authentik_stages_authenticator_validate.authenticatorvalidatestage, [name, authenticator_validation_stage]]
+    order: 20
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  state: present
+  identifiers:
+    target: !Find [authentik_flows.flow, [slug, default-source-authentication]]
+    stage: !Find [authentik_stages_user_login.userloginstage, [name, default-source-authentication-login]]
+    order: 0
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  state: present
+  identifiers:
+    target: !Find [authentik_flows.flow, [slug, default-invalidation-flow]]
+    stage: !Find [authentik_stages_user_logout.userlogoutstage, [name, default-invalidation-logout]]
+    order: 0
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  state: present
+  identifiers:
+    target: !Find [authentik_flows.flow, [slug, default-authenticator-static-setup]]
+    stage: !Find [authentik_stages_authenticator_static.authenticatorstaticstage, [name, default-authenticator-static-setup]]
+    order: 0
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  state: present
+  identifiers:
+    target: !Find [authentik_flows.flow, [slug, default-source-enrollment]]
+    stage: !Find [authentik_stages_prompt.promptstage, [name, default-source-enrollment-prompt]]
+    order: 0
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  state: present
+  identifiers:
+    target: !Find [authentik_flows.flow, [slug, default-source-enrollment]]
+    stage: !Find [authentik_stages_user_write.userwritestage, [name, default-source-enrollment-write]]
+    order: 1
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  state: present
+  identifiers:
+    target: !Find [authentik_flows.flow, [slug, default-source-enrollment]]
+    stage: !Find [authentik_stages_user_login.userloginstage, [name, default-source-enrollment-login]]
+    order: 2
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  state: present
+  identifiers:
+    target: !Find [authentik_flows.flow, [slug, default-authentication-flow]]
+    stage: !Find [authentik_stages_identification.identificationstage, [name, default-authentication-identification]]
+    order: 10
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  state: present
+  identifiers:
+    target: !Find [authentik_flows.flow, [slug, default-authentication-flow]]
+    stage: !Find [authentik_stages_password.passwordstage, [name, default-authentication-password]]
+    order: 20
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  state: present
+  identifiers:
+    target: !Find [authentik_flows.flow, [slug, default-authentication-flow]]
+    stage: !Find [authentik_stages_authenticator_validate.authenticatorvalidatestage, [name, default-authentication-mfa-validation]]
+    order: 30
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  state: present
+  identifiers:
+    target: !Find [authentik_flows.flow, [slug, default-authentication-flow]]
+    stage: !Find [authentik_stages_user_login.userloginstage, [name, default-authentication-login]]
+    order: 100
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  state: present
+  identifiers:
+    target: !Find [authentik_flows.flow, [slug, default-password-change]]
+    stage: !Find [authentik_stages_prompt.promptstage, [name, default-password-change-prompt]]
+    order: 0
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  state: present
+  identifiers:
+    target: !Find [authentik_flows.flow, [slug, default-password-change]]
+    stage: !Find [authentik_stages_user_write.userwritestage, [name, default-password-change-write]]
+    order: 1
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  state: present
+  identifiers:
+    target: !Find [authentik_flows.flow, [slug, default-authenticator-totp-setup]]
+    stage: !Find [authentik_stages_authenticator_totp.authenticatortotpstage, [name, default-authenticator-totp-setup]]
+    order: 0
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  state: present
+  identifiers:
+    target: !Find [authentik_flows.flow, [slug, default-authenticator-webauthn-setup]]
+    stage: !Find [authentik_stages_authenticator_webauthn.authenticatorwebauthnstage, [name, default-authenticator-webauthn-setup]]
+    order: 0
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  state: present
+  identifiers:
+    target: !Find [authentik_flows.flow, [slug, default-user-settings-flow]]
+    stage: !Find [authentik_stages_prompt.promptstage, [name, default-user-settings]]
+    order: 20
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+- model: authentik_flows.flowstagebinding
+  state: present
+  identifiers:
+    target: !Find [authentik_flows.flow, [slug, default-user-settings-flow]]
+    stage: !Find [authentik_stages_user_write.userwritestage, [name, default-user-settings-write]]
+    order: 100
+  attrs:
+    evaluate_on_plan: false
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true

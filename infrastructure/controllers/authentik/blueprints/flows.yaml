@@ -1,0 +1,244 @@
+version: 1
+metadata:
+  name: 'homelab: flows'
+entries:
+- model: authentik_flows.flow
+  state: present
+  identifiers:
+    slug: default-invalidation-flow
+  attrs:
+    authentication: none
+    background: ''
+    compatibility_mode: false
+    denied_action: message_continue
+    designation: invalidation
+    layout: stacked
+    name: Logout
+    policy_engine_mode: any
+    slug: default-invalidation-flow
+    title: Default Invalidation Flow
+- model: authentik_flows.flow
+  state: present
+  identifiers:
+    slug: default-user-settings-flow
+  attrs:
+    authentication: require_authenticated
+    background: ''
+    compatibility_mode: false
+    denied_action: message_continue
+    designation: stage_configuration
+    layout: stacked
+    name: User settings
+    policy_engine_mode: any
+    slug: default-user-settings-flow
+    title: Update your info
+- model: authentik_flows.flow
+  state: present
+  identifiers:
+    slug: default-source-pre-authentication
+  attrs:
+    authentication: none
+    background: ''
+    compatibility_mode: false
+    denied_action: message_continue
+    designation: stage_configuration
+    layout: stacked
+    name: Pre-Authentication
+    policy_engine_mode: any
+    slug: default-source-pre-authentication
+    title: Pre-authentication
+- model: authentik_flows.flow
+  state: present
+  identifiers:
+    slug: stepup-otp
+  attrs:
+    authentication: none
+    background: ''
+    compatibility_mode: false
+    denied_action: message_continue
+    designation: authentication
+    layout: stacked
+    name: stepup-otp
+    policy_engine_mode: any
+    slug: stepup-otp
+    title: stepup-otp
+- model: authentik_flows.flow
+  state: present
+  identifiers:
+    slug: default-authenticator-webauthn-setup
+  attrs:
+    authentication: require_authenticated
+    background: ''
+    compatibility_mode: false
+    denied_action: message_continue
+    designation: stage_configuration
+    layout: stacked
+    name: default-authenticator-webauthn-setup
+    policy_engine_mode: any
+    slug: default-authenticator-webauthn-setup
+    title: Setup WebAuthn
+- model: authentik_flows.flow
+  state: present
+  identifiers:
+    slug: default-request
+  attrs:
+    authentication: require_authenticated
+    background: ''
+    compatibility_mode: false
+    denied_action: message_continue
+    designation: stage_configuration
+    layout: stacked
+    name: Request access
+    policy_engine_mode: any
+    slug: default-request
+    title: Request access
+- model: authentik_flows.flow
+  state: present
+  identifiers:
+    slug: initial-setup
+  attrs:
+    authentication: none
+    background: ''
+    compatibility_mode: false
+    denied_action: message_continue
+    designation: stage_configuration
+    layout: stacked
+    name: default-oobe-setup
+    policy_engine_mode: any
+    slug: initial-setup
+    title: Welcome to authentik!
+- model: authentik_flows.flow
+  state: present
+  identifiers:
+    slug: default-authenticator-totp-setup
+  attrs:
+    authentication: require_authenticated
+    background: ''
+    compatibility_mode: false
+    denied_action: message_continue
+    designation: stage_configuration
+    layout: stacked
+    name: default-authenticator-totp-setup
+    policy_engine_mode: any
+    slug: default-authenticator-totp-setup
+    title: Set up Two-Factor authentication
+- model: authentik_flows.flow
+  state: present
+  identifiers:
+    slug: default-password-change
+  attrs:
+    authentication: require_authenticated
+    background: ''
+    compatibility_mode: false
+    denied_action: message_continue
+    designation: stage_configuration
+    layout: stacked
+    name: Change Password
+    policy_engine_mode: any
+    slug: default-password-change
+    title: Change password
+- model: authentik_flows.flow
+  state: present
+  identifiers:
+    slug: default-authentication-flow
+  attrs:
+    authentication: none
+    background: ''
+    compatibility_mode: false
+    denied_action: message_continue
+    designation: authentication
+    layout: stacked
+    name: Welcome to authentik!
+    policy_engine_mode: any
+    slug: default-authentication-flow
+    title: Welcome to authentik!
+- model: authentik_flows.flow
+  state: present
+  identifiers:
+    slug: default-provider-invalidation-flow
+  attrs:
+    authentication: none
+    background: ''
+    compatibility_mode: false
+    denied_action: message_continue
+    designation: invalidation
+    layout: stacked
+    name: Logged out of application
+    policy_engine_mode: any
+    slug: default-provider-invalidation-flow
+    title: You've logged out of %(app)s.
+- model: authentik_flows.flow
+  state: present
+  identifiers:
+    slug: default-authenticator-static-setup
+  attrs:
+    authentication: require_authenticated
+    background: ''
+    compatibility_mode: false
+    denied_action: message_continue
+    designation: stage_configuration
+    layout: stacked
+    name: default-authenticator-static-setup
+    policy_engine_mode: any
+    slug: default-authenticator-static-setup
+    title: Setup Static OTP Tokens
+- model: authentik_flows.flow
+  state: present
+  identifiers:
+    slug: default-provider-authorization-explicit-consent
+  attrs:
+    authentication: require_authenticated
+    background: ''
+    compatibility_mode: false
+    denied_action: message_continue
+    designation: authorization
+    layout: stacked
+    name: Authorize Application
+    policy_engine_mode: any
+    slug: default-provider-authorization-explicit-consent
+    title: Redirecting to %(app)s
+- model: authentik_flows.flow
+  state: present
+  identifiers:
+    slug: default-provider-authorization-implicit-consent
+  attrs:
+    authentication: require_authenticated
+    background: ''
+    compatibility_mode: false
+    denied_action: message_continue
+    designation: authorization
+    layout: stacked
+    name: Authorize Application
+    policy_engine_mode: any
+    slug: default-provider-authorization-implicit-consent
+    title: Redirecting to %(app)s
+- model: authentik_flows.flow
+  state: present
+  identifiers:
+    slug: default-source-enrollment
+  attrs:
+    authentication: none
+    background: ''
+    compatibility_mode: false
+    denied_action: message_continue
+    designation: enrollment
+    layout: stacked
+    name: Welcome to authentik! Please select a username.
+    policy_engine_mode: any
+    slug: default-source-enrollment
+    title: Welcome to authentik! Please select a username.
+- model: authentik_flows.flow
+  state: present
+  identifiers:
+    slug: default-source-authentication
+  attrs:
+    authentication: require_unauthenticated
+    background: ''
+    compatibility_mode: false
+    denied_action: message_continue
+    designation: authentication
+    layout: stacked
+    name: Welcome to authentik!
+    policy_engine_mode: any
+    slug: default-source-authentication
+    title: Welcome to authentik!

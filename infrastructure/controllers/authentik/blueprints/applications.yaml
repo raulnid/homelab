@@ -1,0 +1,106 @@
+version: 1
+metadata:
+  name: 'homelab: applications'
+entries:
+- model: authentik_core.application
+  state: present
+  identifiers:
+    slug: forgejo
+  attrs:
+    backchannel_providers: []
+    group: ''
+    meta_description: ''
+    meta_hide: false
+    meta_icon: https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Forgejo_logo.svg/1280px-Forgejo_logo.svg.png
+    meta_launch_url: https://git.xzr.es
+    meta_publisher: ''
+    name: Forgejo
+    open_in_new_tab: true
+    policy_engine_mode: any
+    slug: forgejo
+    provider: !Find [authentik_providers_oauth2.oauth2provider, [name, Provider for Forgejo]]
+- model: authentik_core.application
+  state: present
+  identifiers:
+    slug: grafana
+  attrs:
+    backchannel_providers: []
+    group: ''
+    meta_description: ''
+    meta_hide: false
+    meta_icon: https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Grafana_icon.svg/3840px-Grafana_icon.svg.png
+    meta_launch_url: https://stats.xzr.es
+    meta_publisher: ''
+    name: Grafana
+    open_in_new_tab: true
+    policy_engine_mode: any
+    slug: grafana
+    provider: !Find [authentik_providers_oauth2.oauth2provider, [name, Provider for Grafana]]
+- model: authentik_core.application
+  state: present
+  identifiers:
+    slug: harbor
+  attrs:
+    backchannel_providers: []
+    group: ''
+    meta_description: ''
+    meta_hide: false
+    meta_icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/webp/harbor.webp
+    meta_launch_url: https://hub.xzr.es
+    meta_publisher: ''
+    name: Harbor
+    open_in_new_tab: true
+    policy_engine_mode: any
+    slug: harbor
+    provider: !Find [authentik_providers_oauth2.oauth2provider, [name, Provider for Harbor]]
+- model: authentik_core.application
+  state: present
+  identifiers:
+    slug: hubble
+  attrs:
+    backchannel_providers: []
+    group: ''
+    meta_description: ''
+    meta_hide: false
+    meta_icon: https://cdn.jsdelivr.net/gh/cilium/hubble@main/Documentation/images/hubble_logo-dark.png
+    meta_launch_url: https://hubble.xzr.es
+    meta_publisher: ''
+    name: Hubble
+    open_in_new_tab: true
+    policy_engine_mode: any
+    slug: hubble
+    provider: !Find [authentik_providers_proxy.proxyprovider, [name, Provider for Hubble]]
+- model: authentik_core.application
+  state: present
+  identifiers:
+    slug: openbao
+  attrs:
+    backchannel_providers: []
+    group: ''
+    meta_description: ''
+    meta_hide: false
+    meta_icon: https://raw.githubusercontent.com/openbao/artwork/main/color/openbao-color.svg
+    meta_launch_url: https://vault.xzr.es
+    meta_publisher: ''
+    name: OpenBao
+    open_in_new_tab: true
+    policy_engine_mode: any
+    slug: openbao
+    provider: !Find [authentik_providers_oauth2.oauth2provider, [name, Provider for OpenBao]]
+- model: authentik_core.application
+  state: present
+  identifiers:
+    slug: jenkins
+  attrs:
+    backchannel_providers: []
+    group: ''
+    meta_description: ''
+    meta_hide: false
+    meta_icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/webp/jenkins.webp
+    meta_launch_url: https://jenkins.xzr.es
+    meta_publisher: ''
+    name: Jenkins
+    open_in_new_tab: true
+    policy_engine_mode: any
+    slug: jenkins
+    provider: !Find [authentik_providers_oauth2.oauth2provider, [name, Provider for Jenkins]]
