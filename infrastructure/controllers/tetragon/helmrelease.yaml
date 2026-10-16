@@ -1,0 +1,32 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: tetragon
+  namespace: kube-system
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: tetragon
+      version: "1.7.1"
+      sourceRef:
+        kind: HelmRepository
+        name: cilium
+        namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    # Install ALL the chart's CRDs (TracingPolicy, ...) through Helm itself: no dependency on the operator.
+    crds:
+      installMethod: helm
+    # Observe only: no TracingPolicy means no enforcement. Policies come in a later stage, starting in observe-only mode.
+    tetragon:
+      # By default the chart exports PROCESS_EXEC and PROCESS_EXIT for ALL processes (~2.6 KB/line): floods Loki and breaks Grafana queries
+      # (ResourceExhausted: gRPC message > 4 MiB). We only export what the TracingPolicies generate. No EXEC or EXIT.
+      # `tetra getevents` (gRPC) isn't affected by these filters.
+      exportAllowList: |-
+        {"event_set":["PROCESS_KPROBE","PROCESS_UPROBE","PROCESS_TRACEPOINT","PROCESS_LSM"]}

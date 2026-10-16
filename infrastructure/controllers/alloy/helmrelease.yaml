@@ -1,0 +1,194 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: alloy
+  namespace: logging
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: alloy
+      version: "1.11.0"
+      sourceRef:
+        kind: HelmRepository
+        name: grafana
+        namespace: logging
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  values:
+    # Enable host mounts for logs
+    alloy:
+      # No usage telemetry to stats.grafana.org (unnecessary internet egress for a
+      # DaemonSet that reads the logs of every pod). Adds --disable-reporting.
+      enableReporting: false
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi
+      extraEnv:
+        - name: "NODE_NAME"
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+      mounts:
+        extra:
+          - name: varlog
+            mountPath: /var/log
+            readOnly: true
+          - name: varlibdockercontainers
+            mountPath: /var/lib/docker/containers
+            readOnly: true
+      configMap:
+        content: |
+          logging {
+            level  = "info"
+            format = "logfmt"
+          }
+
+          // --- 1. Pod Logs Collection ---
+          discovery.kubernetes "pods" {
+            role = "pod"
+          }
+
+          discovery.relabel "logs" {
+            targets = discovery.kubernetes.pods.targets
+
+            // Keep only pods on this node (DaemonSet efficiency)
+            rule {
+              source_labels = ["__meta_kubernetes_pod_node_name"]
+              regex         = sys.env("NODE_NAME")
+              action        = "keep"
+            }
+
+            // Label: job
+            rule {
+              target_label = "job"
+              replacement  = "application_logs"
+            }
+
+            // Label: app
+            rule {
+              source_labels = ["__meta_kubernetes_pod_label_app", "__meta_kubernetes_pod_label_app_kubernetes_io_name"]
+              separator     = ";"
+              regex         = "^(?:;*)?([^;]+).*$"
+              target_label  = "app"
+            }
+
+            // Label: environment (development if namespace ends in -staging)
+            rule {
+              source_labels = ["__meta_kubernetes_namespace"]
+              regex         = ".*-staging"
+              replacement   = "development"
+              target_label  = "environment"
+            }
+
+            rule {
+              source_labels = ["environment"]
+              regex         = "^$"
+              replacement   = "production"
+              target_label  = "environment"
+            }
+
+            // Label: node
+            rule {
+              source_labels = ["__meta_kubernetes_pod_node_name"]
+              target_label  = "node"
+            }
+
+            // Label: container
+            rule {
+              source_labels = ["__meta_kubernetes_pod_container_name"]
+              target_label  = "container"
+            }
+
+            // Label: namespace
+            rule {
+              source_labels = ["__meta_kubernetes_namespace"]
+              target_label  = "namespace"
+            }
+          }
+
+          // Native Pod Log Source (handles paths and rotations automatically)
+          loki.source.kubernetes "pods" {
+            targets    = discovery.relabel.logs.output
+            forward_to = [loki.process.logs.receiver]
+          }
+
+          // --- 2. Log Processing (JSON & Multi-line) ---
+          loki.process "logs" {
+
+            stage.drop {
+              expression = "(?i).*/(health|ready).*"
+            }
+
+            // Attempt to parse JSON logs to extract extra labels
+            stage.json {
+              expressions = {
+                level  = "level",
+                msg    = "msg",
+                status = "status",
+              }
+            }
+
+            // If level was found in JSON, set it as a label
+            stage.labels {
+              values = {
+                level = "",
+              }
+            }
+
+            forward_to = [loki.write.default.receiver]
+          }
+
+          // --- 3. Kubernetes Events Collection ---
+          loki.source.kubernetes_events "cluster_events" {
+            job_name   = "kubernetes_cluster_events"
+            log_format = "logfmt"
+            forward_to = [loki.process.cluster_events.receiver]
+          }
+
+          loki.process "cluster_events" {
+            stage.static_labels {
+              values = {
+                "job" = "kubernetes_cluster_events",
+              }
+            }
+            forward_to = [loki.write.default.receiver]
+          }
+
+          // --- 4. Output to Loki (with WAL) ---
+          loki.write "default" {
+            endpoint {
+              url = "http://loki.logging.svc.cluster.local:3100/loki/api/v1/push"
+            }
+            external_labels = {
+              cluster = "metadata-cluster",
+            }
+            // WAL for reliability
+            wal {
+              enabled = true
+            }
+          }
+
+    controller:
+      type: daemonset
+      volumes:
+        extra:
+          - name: varlog
+            hostPath:
+              path: /var/log
+          - name: varlibdockercontainers
+            hostPath:
+              path: /var/lib/docker/containers
+
+    serviceAccount:
+      create: true
+      name: alloy
+
+    rbac:
+      create: true
