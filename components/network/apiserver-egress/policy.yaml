@@ -1,0 +1,36 @@
+# Infra pods that talk to the kube-apiserver (watch/CRUD of resources).
+# The apiserver (192.168.1.20) does NOT have the `host` identity: Cilium sees it as
+# `kube-apiserver` + `remote-node`, so the deny-all `toEntities: host` doesn't cover it.
+# Seen in Hubble: grafana (sidecar), prometheus (control-plane scrape).
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: infra-egress-to-apiserver
+spec:
+  endpointSelector:
+    matchExpressions:
+      - key: "k8s:io.kubernetes.pod.namespace"
+        operator: In
+        values:
+          - flux-system
+          - cnpg-system
+          - monitoring
+          - logging
+          - reloader
+          - local-path-storage
+          - kube-system
+          - openbao
+          - cert-manager
+          - pg-internal
+          - pg-production
+          - pg-staging
+      - key: "net/system-controller"
+        operator: DoesNotExist
+  egress:
+    - toEntities:
+        - kube-apiserver
+        - remote-node
+      toPorts:
+        - ports:
+            - port: "6443"
+              protocol: TCP

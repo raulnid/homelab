@@ -1,0 +1,41 @@
+# ESO and cert-manager are exempt from deny-all (net/system-controller) for THEIR traffic,
+# but the destination is under deny-all: ingress has to be opened on OpenBao and step-ca.
+# Seen: external-secrets -> openbao:8200 (INGRESS AUDIT).
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: openbao-ingress-from-controllers
+spec:
+  endpointSelector:
+    matchLabels:
+      k8s:io.kubernetes.pod.namespace: openbao
+      app.kubernetes.io/name: openbao
+  ingress:
+    - fromEndpoints:
+        - matchExpressions:
+            - key: "k8s:io.kubernetes.pod.namespace"
+              operator: In
+              values: [external-secrets, cert-manager]
+      toPorts:
+        - ports:
+            - port: "8200"
+              protocol: TCP
+---
+# cert-manager (ACME) -> step-ca:9000.
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: step-ca-ingress-from-cert-manager
+spec:
+  endpointSelector:
+    matchLabels:
+      k8s:io.kubernetes.pod.namespace: step-ca
+      app: step-ca
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: cert-manager
+      toPorts:
+        - ports:
+            - port: "9000"
+              protocol: TCP

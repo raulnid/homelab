@@ -1,0 +1,19 @@
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: authentik-egress-to-hubble
+spec:
+  endpointSelector:
+    matchLabels:
+      net/to-hubble: "true"
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s-app: hubble-ui
+      toPorts:
+        - ports:
+            # Pod port (targetPort of the hubble-ui:80 svc), which is what
+            # Cilium enforces after the ClusterIP translation.
+            - port: "8081"
+              protocol: TCP

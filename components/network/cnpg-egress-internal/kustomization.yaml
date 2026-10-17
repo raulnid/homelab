@@ -1,0 +1,5 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - apps-egress-to-cnpg-internal.yaml
+  - cnpg-internal-ingress-from-apps.yaml

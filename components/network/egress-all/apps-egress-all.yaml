@@ -1,0 +1,16 @@
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: apps-egress-all
+spec:
+  # Pods that need to reach any destination (e.g. the OIDC back-channel to the
+  # public-gateway, an l7-load-balancer towards the reserved "ingress" identity).
+  # Only opens EGRESS; ingress for these pods is still governed by deny-all-audit.
+  endpointSelector:
+    matchLabels:
+      net/egress-all: "true"
+  egress:
+    # "all" covers any identity/CIDR (ingress included) without selecting the
+    # ingress entity as an endpoint, so it doesn't break the gateway's incoming traffic.
+    - toEntities:
+        - all

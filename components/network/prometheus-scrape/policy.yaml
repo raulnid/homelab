@@ -1,0 +1,72 @@
+# Prometheus scrape. Two halves: egress from prometheus, ingress on the targets.
+# Ports SEEN in Hubble: 9187 (cnpg), 9400 (dcgm), 9153 (coredns), 9402 (cert-manager),
+# 10257/10259/2381 (controller-manager, scheduler, etcd on the control-plane node).
+# Ports added without having seen them (keep-alive connections don't regenerate a verdict): 9100
+# (node-exporter), 6443 (apiserver). If you scrape Cilium/Hubble, add 9962-9965.
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: prometheus-egress-scrape
+spec:
+  endpointSelector:
+    matchLabels:
+      k8s:io.kubernetes.pod.namespace: monitoring
+      app.kubernetes.io/name: prometheus
+  egress:
+    - toEndpoints:
+        - matchExpressions:
+            - key: "k8s:io.kubernetes.pod.namespace"
+              operator: Exists
+      toPorts:
+        - ports:
+            - port: "9187"
+              protocol: TCP
+            - port: "9400"
+              protocol: TCP
+            - port: "9153"
+              protocol: TCP
+            - port: "9402"
+              protocol: TCP
+    - toEntities:
+        - host
+        - remote-node
+        - kube-apiserver
+      toPorts:
+        - ports:
+            - port: "9100"
+              protocol: TCP
+            - port: "6443"
+              protocol: TCP
+            - port: "10257"
+              protocol: TCP
+            - port: "10259"
+              protocol: TCP
+            - port: "2381"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: prometheus-ingress-scrape
+spec:
+  endpointSelector:
+    matchExpressions:
+      - key: "k8s:io.kubernetes.pod.namespace"
+        operator: Exists
+      - key: "net/system-controller"
+        operator: DoesNotExist
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: monitoring
+            app.kubernetes.io/name: prometheus
+      toPorts:
+        - ports:
+            - port: "9187"
+              protocol: TCP
+            - port: "9400"
+              protocol: TCP
+            - port: "9153"
+              protocol: TCP
+            - port: "9402"
+              protocol: TCP

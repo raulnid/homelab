@@ -1,0 +1,18 @@
+# apps-egress-to-powerdns.yaml
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: apps-egress-to-powerdns-internal
+spec:
+  endpointSelector:
+    matchLabels:
+      net/to-powerdns-internal: "true"
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: powerdns
+            app.kubernetes.io/name: powerdns-auth
+      toPorts:
+        - ports:
+            - port: "8081"      # PowerDNS HTTP API (DNS-01)
+              protocol: TCP

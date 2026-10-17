@@ -1,0 +1,64 @@
+# Incoming traffic from the control-plane / nodes to specific pods, each one on ITS port.
+# The apiserver (192.168.1.20) shows up as kube-apiserver+remote-node; the deny-all `fromEntities: host`
+# doesn't cover it.
+# Selector per pod (not per namespace) so nothing else gets opened: the OpenBao server, for example,
+# gets NONE of this. net/system-controller pods (cert-manager, ESO) are exempt from deny-all.
+#
+# Seen in Hubble: remote-node -> cnpg :9443, remote-node -> openbao-agent-injector :8080.
+# cert-manager-webhook-pdns (APIService) hasn't been seen live.
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: cnpg-webhook-ingress-from-apiserver
+spec:
+  endpointSelector:
+    matchLabels:
+      k8s:io.kubernetes.pod.namespace: cnpg-system
+      app.kubernetes.io/name: cloudnative-pg
+  ingress:
+    - fromEntities:
+        - kube-apiserver
+        - remote-node
+        - host
+      toPorts:
+        - ports:
+            - port: "9443"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: openbao-injector-ingress-from-apiserver
+spec:
+  endpointSelector:
+    matchLabels:
+      k8s:io.kubernetes.pod.namespace: openbao
+      app.kubernetes.io/name: openbao-agent-injector
+  ingress:
+    - fromEntities:
+        - kube-apiserver
+        - remote-node
+        - host
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: pdns-webhook-ingress-from-apiserver
+spec:
+  endpointSelector:
+    matchLabels:
+      k8s:io.kubernetes.pod.namespace: cert-manager
+      app.kubernetes.io/name: cert-manager-webhook-pdns
+  ingress:
+    - fromEntities:
+        - kube-apiserver
+        - remote-node
+        - host
+      toPorts:
+        - ports:
+            - port: "8443"
+              protocol: TCP

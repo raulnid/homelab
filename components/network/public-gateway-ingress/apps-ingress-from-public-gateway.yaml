@@ -1,0 +1,11 @@
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: apps-ingress-from-public-gateway
+spec:
+  endpointSelector:
+    matchLabels:
+      net/from-public-gw: "true"
+  ingress:
+    - fromEntities:
+        - ingress

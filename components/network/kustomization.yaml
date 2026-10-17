@@ -1,0 +1,23 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - apiserver-egress
+  - authentik-egress
+  - baseline-allow
+  - cnpg-egress-internal
+  - cnpg-operator
+  - control-plane-ingress
+  - deny-all
+  - dns-powerdns
+  - egress-all
+  - harbor-intra
+  - hubble-egress
+  - infra-intra-namespace
+  - infra-world-egress
+  - kube-dns-ingress
+  - powerdns-egress-internal
+  - powerdns-egress-recursor
+  - prometheus-scrape
+  - public-gateway-ingress
+  - redis-egress
+  - secrets-plane-ingress

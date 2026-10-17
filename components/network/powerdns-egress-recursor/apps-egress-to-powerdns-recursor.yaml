@@ -1,0 +1,22 @@
+# apps-egress-to-powerdns.yaml
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: apps-egress-to-powerdns-recursor
+spec:
+  endpointSelector:
+    matchLabels:
+      net/to-powerdns-recursor: "true"
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: powerdns
+            app.kubernetes.io/name: powerdns-recursor
+      toPorts:
+        - ports:
+            # The Service exposes 53, but the container listens on 1053 (targetPort) and Cilium
+            # evaluates against the backend port. DNS goes over UDP and falls back to TCP if truncated.
+            - port: "1053"
+              protocol: UDP
+            - port: "1053"
+              protocol: TCP

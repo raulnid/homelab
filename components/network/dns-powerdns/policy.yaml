@@ -1,0 +1,137 @@
+# DNS chain: coredns -> recursor:1053 -> auth:1053, and recursor -> node DNS / upstream.
+# Observed in Hubble: recursor->auth UDP/1053, coredns->recursor UDP/1053,
+# recursor->192.168.1.20:53 (kube-apiserver+remote-node), coredns->1.1.1.1:53 (world).
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: coredns-egress-upstream
+spec:
+  endpointSelector:
+    matchLabels:
+      k8s:io.kubernetes.pod.namespace: kube-system
+      k8s-app: kube-dns
+  egress:
+    - toEntities:
+        - world
+        - remote-node
+        - host
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: powerdns
+            app.kubernetes.io/name: powerdns-recursor
+      toPorts:
+        - ports:
+            - port: "1053"
+              protocol: UDP
+            - port: "1053"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: powerdns-recursor-flows
+spec:
+  endpointSelector:
+    matchLabels:
+      k8s:io.kubernetes.pod.namespace: powerdns
+      app.kubernetes.io/name: powerdns-recursor
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "1053"
+              protocol: UDP
+            - port: "1053"
+              protocol: TCP
+    - fromEntities:        # queries coming from the nodes (cilium_host)
+        - remote-node
+        - host
+      toPorts:
+        - ports:
+            - port: "1053"
+              protocol: UDP
+            - port: "1053"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: powerdns
+            app.kubernetes.io/name: powerdns-auth
+      toPorts:
+        - ports:
+            - port: "1053"
+              protocol: UDP
+            - port: "1053"
+              protocol: TCP
+    - toEntities:
+        - world
+        - remote-node
+        - kube-apiserver
+        - host
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+---
+# INGRESS halves that were missing for the net/to-powerdns-* labels (only egress existed):
+# cert-manager (DNS-01) -> auth:8081 y -> recursor:53/TCP.
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: powerdns-auth-ingress-from-apps
+spec:
+  endpointSelector:
+    matchLabels:
+      k8s:io.kubernetes.pod.namespace: powerdns
+      app.kubernetes.io/name: powerdns-auth
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            net/to-powerdns-internal: "true"
+      toPorts:
+        - ports:
+            - port: "8081"
+              protocol: TCP
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: powerdns
+            app.kubernetes.io/name: powerdns-recursor
+      toPorts:
+        - ports:
+            - port: "1053"
+              protocol: UDP
+            - port: "1053"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: powerdns-recursor-ingress-from-apps
+spec:
+  endpointSelector:
+    matchLabels:
+      k8s:io.kubernetes.pod.namespace: powerdns
+      app.kubernetes.io/name: powerdns-recursor
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            net/to-powerdns-recursor: "true"
+      toPorts:
+        - ports:
+            # The Service exposes 53 but the container listens on 1053 (targetPort) and
+            # Cilium evaluates the policy against the backend port, not the Service one.
+            - port: "1053"
+              protocol: UDP
+            - port: "1053"
+              protocol: TCP

@@ -1,0 +1,45 @@
+# Forgejo -> GitHub: pull mirrors over HTTPS (github.com / api.github.com).
+# Checked in the Forgejo logs: 0 SSH remotes (no need for :22) and the DB is SQLite (no egress to Postgres).
+# Seen in Hubble: forgejo -> 140.82.121.4:443.
+#
+# `world` and not toFQDNs on purpose: toFQDNs forces DNS through the Cilium proxy (L7), and Cilium's
+# L7 plane is known to be flaky. This is the spot where narrowing to the GitHub ranges would pay off
+# most (toCIDRSet, https://api.github.com/meta) if it's ever needed.
+#
+# Flux does NOT need a policy: it installs its own NetworkPolicies (allow-egress: open egress) in flux-system.
+# Alloy neither: reporting is disabled (enableReporting: false), it was its only flow to the internet.
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: forgejo-egress-github
+spec:
+  endpointSelector:
+    matchLabels:
+      k8s:io.kubernetes.pod.namespace: forgejo
+  egress:
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+---
+# Harbor Trivy -> internet: download/update of the vulnerability database
+# (ghcr.io / mirror.gcr.io, HTTPS). Only the trivy pod; the rest of the pods still have no egress to world.
+# `world` and not toFQDNs for the same reason as above (avoid the L7 DNS proxy).
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: harbor-trivy-egress-world
+spec:
+  endpointSelector:
+    matchLabels:
+      k8s:io.kubernetes.pod.namespace: harbor
+      component: trivy
+  egress:
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
