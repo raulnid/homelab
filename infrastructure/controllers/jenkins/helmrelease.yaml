@@ -1,0 +1,63 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: jenkins
+  namespace: jenkins
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: jenkins
+      version: "5.9.69"
+      sourceRef:
+        kind: HelmRepository
+        name: jenkins
+        namespace: jenkins
+      interval: 12h
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    controller:
+      jenkinsUrl: https://jenkins.xzr.es
+      admin:
+        existingSecret: jenkins-admin
+        userKey: jenkins-admin-user
+        passwordKey: jenkins-admin-password
+      additionalPlugins:
+        - oidc-auth
+      containerEnv:
+        - name: OIDC_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jenkins-oidc
+              key: client_secret
+      JCasC:
+        defaultConfig: true
+        configScripts:
+          oidc: |
+            jenkins:
+              securityRealm:
+                oic:
+                  clientId: KTNEMu39bXajpR0AOIBPit2znfmhen6B1XN1Ij6g
+                  clientSecret: ${OIDC_CLIENT_SECRET}
+                  wellKnownOpenIDConfigurationUrl: https://auth.xzr.es/application/o/jenkins/.well-known/openid-configuration
+                  userNameField: preferred_username
+                  groupsFieldName: groups
+                  scopes: openid email profile
+                  logoutFromOpenidProvider: true
+              authorizationStrategy:
+                globalMatrix:
+                  entries:
+                    - group:
+                        name: Jenkins Admins
+                        permissions:
+                          - Overall/Administer
+    persistence:
+      existingClaim: jenkins
+    # Builds run in throwaway kaniko pods defined in each Jenkinsfile, so no default agent
+    agent:
+      enabled: false
