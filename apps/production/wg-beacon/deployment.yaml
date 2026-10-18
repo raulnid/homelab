@@ -6,7 +6,8 @@ metadata:
   annotations:
     reloader.stakater.com/auto: "true"
 spec:
-  replicas: 1
+  # 0 until Jenkins has built and pushed the first image (ImagePullBackOff keeps the apps Kustomization unhealthy)
+  replicas: 0
   selector:
     matchLabels:
       app: wg-beacon
