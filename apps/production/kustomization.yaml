@@ -4,3 +4,4 @@ resources:
   - mealie
   - siyuan
   - wireguard
+  - wg-beacon

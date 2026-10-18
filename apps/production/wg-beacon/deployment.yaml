@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wg-beacon
+  namespace: wg-beacon
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wg-beacon
+  template:
+    metadata:
+      labels:
+        app: wg-beacon
+    spec:
+      imagePullSecrets:
+        - name: harbor-pull
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        fsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: wg-beacon
+          # ponytail: pin by hand to the tag Jenkins pushed (latest in the registry is not reproducible)
+          image: hub.xzr.es/library/wg-beacon:latest
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              memory: 64Mi
+          volumeMounts:
+            - name: conf
+              mountPath: /app/.env
+              subPath: .env
+              readOnly: true
+            - name: conf
+              mountPath: /app/pem
+              readOnly: true
+      volumes:
+        - name: conf
+          secret:
+            secretName: wg-beacon
+            defaultMode: 0440
