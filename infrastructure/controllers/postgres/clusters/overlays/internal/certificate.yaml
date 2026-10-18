@@ -1,0 +1,26 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: pg-server-tls
+  namespace: pg-internal
+spec:
+  secretName: pg-server-tls
+  duration: 720h
+  renewBefore: 240h
+  commonName: pg-rw.pg-internal.svc.cluster.local
+  # exactly the names pki/roles/postgres-server allows (no subdomains, no IPs)
+  dnsNames:
+    - pg-rw.pg-internal.svc.cluster.local
+    - pg-ro.pg-internal.svc.cluster.local
+    - pg-r.pg-internal.svc.cluster.local
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  usages:
+    - server auth
+    - digital signature
+    - key encipherment
+  issuerRef:
+    name: openbao-pg-server
+    kind: ClusterIssuer
+    group: cert-manager.io

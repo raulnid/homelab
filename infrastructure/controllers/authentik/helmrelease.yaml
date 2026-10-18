@@ -66,8 +66,9 @@ spec:
               name: authentik-db-creds
               key: password
         - name: AUTHENTIK_POSTGRESQL__SSLMODE
-          # TLS on the wire with the cert CNPG generates; no CA check (it would need the CNPG CA, or the PG server cert from the OpenBao PKI)
-          value: require
+          value: verify-full
+        - name: AUTHENTIK_POSTGRESQL__SSLROOTCERT
+          value: /etc/authentik/pg-ca/ca.crt
 
         - name: AUTHENTIK_PROVIDER_SECRET_FORGEJO
           valueFrom:
@@ -99,6 +100,15 @@ spec:
             secretKeyRef:
               name: authentik-provider-secrets
               key: hubble
+
+      volumes:
+        - name: pg-ca
+          secret:
+            secretName: authentik-pg-ca
+      volumeMounts:
+        - name: pg-ca
+          mountPath: /etc/authentik/pg-ca
+          readOnly: true
 
     server:
       replicas: 1

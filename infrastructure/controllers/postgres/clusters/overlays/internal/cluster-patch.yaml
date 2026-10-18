@@ -4,10 +4,10 @@ metadata:
   name: pg
 spec:
   instances: 3
-  # certificates:
-  #   serverTLSSecret: pg-server-tls
-  #   serverCASecret: pg-server-ca
-  #   replicationTLSSecret: pg-replica-tls
+  # server cert from the OpenBao PKI; the client CA and the streaming_replica cert stay managed by the operator
+  certificates:
+    serverTLSSecret: pg-server-tls
+    serverCASecret: pg-server-ca
   storage:
     size: 10Gi
     storageClass: postgres-local

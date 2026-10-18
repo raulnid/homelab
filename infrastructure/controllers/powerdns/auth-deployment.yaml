@@ -37,7 +37,7 @@ spec:
             - --gpgsql-dbname=$(PGDATABASE)
             - --gpgsql-user=$(PGUSER)
             - --gpgsql-password=$(PGPASSWORD)
-            - --gpgsql-extra-connection-parameters=sslmode=require
+            - --gpgsql-extra-connection-parameters=sslmode=verify-full sslrootcert=/etc/powerdns/ssl-ca/ca.crt
             - --api-key=$(PDNS_API_KEY)
           ports:
             - name: dns-udp
@@ -103,7 +103,13 @@ spec:
               mountPath: /etc/powerdns/pdns.conf
               subPath: pdns.conf
               readOnly: true
+            - name: db-ca
+              mountPath: /etc/powerdns/ssl-ca
+              readOnly: true
       volumes:
         - name: config
           configMap:
             name: powerdns-auth-config
+        - name: db-ca
+          secret:
+            secretName: powerdns-pg-ca
