@@ -65,9 +65,7 @@ spec:
                   name: powerdns-secret
                   key: database
             - name: SQLALCHEMY_DATABASE_URI
-              # verify-ca: same reason as pdns-auth: host through the K8s Service
-              # (DNS bootstrap) and the server cert only has SANs for another domain.
-              value: "postgresql://$(PDA_DB_USER):$(PDA_DB_PASSWORD)@$(PG_HOST):$(PG_PORT)/$(PDA_DB_NAME)?sslmode=verify-ca&sslrootcert=/etc/pda/ssl-ca/ca.crt&sslcert=/etc/pda/ssl/tls.crt&sslkey=/etc/pda/ssl/tls.key"
+              value: "postgresql://$(PDA_DB_USER):$(PDA_DB_PASSWORD)@$(PG_HOST):$(PG_PORT)/$(PDA_DB_NAME)?sslmode=disable"
             # Connection to the PowerDNS Auth API
             - name: PDNS_API_URL
               value: "http://powerdns-auth-api.powerdns.svc.cluster.local:8081"
@@ -98,22 +96,6 @@ spec:
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
-          volumeMounts:
-            - name: db-tls
-              mountPath: /etc/pda/ssl
-              readOnly: true
-            - name: db-ca
-              mountPath: /etc/pda/ssl-ca
-              readOnly: true
-      volumes:
-        - name: db-tls
-          secret:
-            # defaultMode is the permissions in DECIMAL (NOT OCTAL), 416 would be 640 in octal.
-            defaultMode: 416
-            secretName: powerdns-pg-tls
-        - name: db-ca
-          secret:
-            secretName: powerdns-pg-ca
 ---
 apiVersion: v1
 kind: Service

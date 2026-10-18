@@ -7,6 +7,5 @@ resources:
   - auth-deployment.yaml
   - auth-service.yaml
   - admin-deployment.yaml
-  - certificate.yaml
   - httproute.yaml
   - external-secrets.yaml

@@ -52,7 +52,7 @@ spec:
           value: "true"
         # Since 2025.x authentik doesn't use Redis: cache, sessions and tasks live in Postgres.
         - name: AUTHENTIK_POSTGRESQL__HOST
-          value: internal.xzr.es
+          value: pg-rw.pg-internal.svc.cluster.local
         - name: AUTHENTIK_POSTGRESQL__NAME
           value: authentik
         - name: AUTHENTIK_POSTGRESQL__USER
@@ -66,13 +66,8 @@ spec:
               name: authentik-db-creds
               key: password
         - name: AUTHENTIK_POSTGRESQL__SSLMODE
-          value: verify-full
-        - name: AUTHENTIK_POSTGRESQL__SSLROOTCERT
-          value: /etc/authentik/pg-ca/ca.crt
-        - name: AUTHENTIK_POSTGRESQL__SSLCERT
-          value: /etc/authentik/pg-tls/tls.crt
-        - name: AUTHENTIK_POSTGRESQL__SSLKEY
-          value: /etc/authentik/pg-tls/tls.key
+          # no TLS to Postgres for now (the cluster has none); password only, Cilium encrypts pod traffic
+          value: disable
 
         - name: AUTHENTIK_PROVIDER_SECRET_FORGEJO
           valueFrom:
@@ -104,22 +99,6 @@ spec:
             secretKeyRef:
               name: authentik-provider-secrets
               key: hubble
-      volumes:
-        - name: pg-tls
-          secret:
-            # defaultMode is the permissions in DECIMAL (NOT OCTAL), 416 would be 640 in octal.
-            defaultMode: 416
-            secretName: authentik-pg-tls
-        - name: pg-ca
-          secret:
-            secretName: authentik-pg-ca
-      volumeMounts:
-        - name: pg-tls
-          mountPath: /etc/authentik/pg-tls
-          readOnly: true
-        - name: pg-ca
-          mountPath: /etc/authentik/pg-ca
-          readOnly: true
 
     server:
       replicas: 1

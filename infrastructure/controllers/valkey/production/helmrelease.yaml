@@ -35,48 +35,11 @@ spec:
       disklessSync: false
       persistence:
         size: "5Gi"
+    # no TLS for now (the PKI comes later); ACL users with static passwords
     tls:
-      enabled: true
-      # cert secret with issuer openbao-server, ca.crt from the root CA
-      # carries serverAuth + clientAuth for server + replicas
-      existingSecret: vk-server-tls
-      serverPublicKey: tls.crt
-      serverKey: tls.key
-      caPublicKey: ca.crt
-      # part of the reason for static passwords: openbao's valkey (and redis) plugin
-      # has no client certificate support, which is a security problem,
-      # so it's simply better to drop the weak piece and keep mTLS
-      requireClientCertificate: true
+      enabled: false
     metrics:
       enabled: true
-      exporter:
-        # exporter connects without tls, rediss:// forces tls, skip verification
-        # because it's intra-pod traffic, the hostname isn't valid and it's not worth
-        # routing it out to the gateway and back in. mTLS mounted
-        # in extraVolumeMounts
-        extraEnvs:
-          REDIS_ADDR: "rediss://localhost:6379"
-          REDIS_EXPORTER_SKIP_TLS_VERIFICATION: "true"
-          REDIS_EXPORTER_TLS_CLIENT_CERT_FILE: "/tls/tls.crt"
-          REDIS_EXPORTER_TLS_CLIENT_KEY_FILE: "/tls/tls.key"
-        extraVolumeMounts:
-          - name: valkey-tls
-            mountPath: /tls
-            readOnly: true
       serviceMonitor:
         enabled: true
-        # the probes are hardcoded without tls, the chart is patched manually to add
-        # --cert and --key for probes with mTLS and avoid problems with requireClientCertificates
-  postRenderers:
-    - kustomize:
-        patches:
-          - target:
-              kind: StatefulSet
-              name: valkey
-            patch: |
-              - op: replace
-                path: /spec/template/spec/containers/0/startupProbe/exec/command
-                value: ["sh", "-c", "valkey-cli --cacert /tls/ca.crt --cert /tls/tls.crt --key /tls/tls.key --tls ping"]
-              - op: replace
-                path: /spec/template/spec/containers/0/livenessProbe/exec/command
-                value: ["sh", "-c", "valkey-cli --cacert /tls/ca.crt --cert /tls/tls.crt --key /tls/tls.key --tls ping"]
+
