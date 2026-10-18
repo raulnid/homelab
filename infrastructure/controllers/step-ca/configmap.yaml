@@ -36,6 +36,10 @@ data:
               "x": "ilqVJxk4U5mF8OWYgnrfc3pm1w7Jcbhd6fQHYD6iWAk",
               "y": "QhK6a0REnWlL81LUjrDMgXW4GS_5BFbJXjrY126719w"
             }
+          },
+          {
+            "type": "ACME",
+            "name": "acme"
           }
         ],
         "template": {},
