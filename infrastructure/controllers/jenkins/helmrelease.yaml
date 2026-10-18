@@ -28,7 +28,7 @@ spec:
         userKey: jenkins-admin-user
         passwordKey: jenkins-admin-password
       additionalPlugins:
-        - oidc-auth
+        - oic-auth
       containerEnv:
         - name: OIDC_CLIENT_SECRET
           valueFrom:
