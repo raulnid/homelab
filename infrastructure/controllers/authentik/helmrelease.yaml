@@ -66,8 +66,8 @@ spec:
               name: authentik-db-creds
               key: password
         - name: AUTHENTIK_POSTGRESQL__SSLMODE
-          # no TLS to Postgres for now (the cluster has none); password only, Cilium encrypts pod traffic
-          value: disable
+          # TLS on the wire with the cert CNPG generates; no CA check (it would need the CNPG CA, or the PG server cert from the OpenBao PKI)
+          value: require
 
         - name: AUTHENTIK_PROVIDER_SECRET_FORGEJO
           valueFrom:

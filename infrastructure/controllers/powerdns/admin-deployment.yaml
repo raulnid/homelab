@@ -65,7 +65,7 @@ spec:
                   name: powerdns-secret
                   key: database
             - name: SQLALCHEMY_DATABASE_URI
-              value: "postgresql://$(PDA_DB_USER):$(PDA_DB_PASSWORD)@$(PG_HOST):$(PG_PORT)/$(PDA_DB_NAME)?sslmode=disable"
+              value: "postgresql://$(PDA_DB_USER):$(PDA_DB_PASSWORD)@$(PG_HOST):$(PG_PORT)/$(PDA_DB_NAME)?sslmode=require"
             # Connection to the PowerDNS Auth API
             - name: PDNS_API_URL
               value: "http://powerdns-auth-api.powerdns.svc.cluster.local:8081"

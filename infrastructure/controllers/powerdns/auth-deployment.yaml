@@ -37,7 +37,7 @@ spec:
             - --gpgsql-dbname=$(PGDATABASE)
             - --gpgsql-user=$(PGUSER)
             - --gpgsql-password=$(PGPASSWORD)
-            - --gpgsql-extra-connection-parameters=sslmode=disable
+            - --gpgsql-extra-connection-parameters=sslmode=require
             - --api-key=$(PDNS_API_KEY)
           ports:
             - name: dns-udp

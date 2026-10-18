@@ -94,4 +94,22 @@ spec:
         role: cert-manager
         serviceAccountRef:
           name: cert-manager-openbao
-
+---
+# Dedicated issuer for Valkey: pki/roles/valkey only allows valkey.xzr.es (server + client auth).
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: openbao-valkey
+spec:
+  vault:
+    server: https://openbao-openbao.openbao.svc.cluster.local:8200
+    path: pki/sign/valkey
+    caBundleSecretRef:
+      name: internal-ca-tls
+      key: tls.crt
+    auth:
+      kubernetes:
+        mountPath: /v1/auth/kubernetes
+        role: cert-manager
+        serviceAccountRef:
+          name: cert-manager-openbao
