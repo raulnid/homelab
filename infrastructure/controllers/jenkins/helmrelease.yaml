@@ -29,6 +29,8 @@ spec:
         passwordKey: jenkins-admin-password
       additionalPlugins:
         - oic-auth
+        # globalMatrix in the JCasC authorizationStrategy
+        - matrix-auth
       containerEnv:
         - name: OIDC_CLIENT_SECRET
           valueFrom:
