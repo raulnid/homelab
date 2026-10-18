@@ -1,0 +1,11 @@
+# Only CRDs and operators (HelmReleases). Nothing that uses those CRDs.
+# The Gateway API / cert-manager / ESO CRDs are installed by the `crds` Kustomization.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../controllers/cilium
+  - ../../controllers/cert-manager
+  - ../../controllers/external-secrets
+  - ../../controllers/postgres/operator
+  - ../../controllers/reloader
+  - ../../controllers/tetragon

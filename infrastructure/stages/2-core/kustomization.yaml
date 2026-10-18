@@ -1,0 +1,14 @@
+# Platform the rest depends on: issuers, OpenBao, step-ca, network, DNS, databases.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../controllers/cert-manager/config
+  - ../../controllers/external-secrets/configuration
+  - ../../controllers/openbao
+  - ../../controllers/step-ca
+  - ../../controllers/cilium-gateway
+  - ../../controllers/postgres/clusters
+  - ../../controllers/powerdns
+  - ../../controllers/powerdns-recursor
+  # CiliumNetworkPolicies (default-deny) disabled until they're reviewed against this cluster
+  # - ../../../components/network
