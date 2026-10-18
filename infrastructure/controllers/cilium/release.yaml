@@ -18,7 +18,8 @@ spec:
     tunnelProtocol: vxlan
     ipam:
       mode: kubernetes
-    mtu: 1400
+    # was `mtu: 1400`: the chart key is uppercase, so it was ignored. 1500 = eno1 MTU, Cilium sizes the pods from it
+    MTU: 1500
     kubeProxyReplacement: true
     gatewayAPI:
       enabled: true
