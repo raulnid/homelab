@@ -46,10 +46,12 @@ spec:
                 oic:
                   clientId: KTNEMu39bXajpR0AOIBPit2znfmhen6B1XN1Ij6g
                   clientSecret: ${OIDC_CLIENT_SECRET}
-                  wellKnownOpenIDConfigurationUrl: https://auth.xzr.es/application/o/jenkins/.well-known/openid-configuration
+                  serverConfiguration:
+                    wellKnown:
+                      wellKnownOpenIDConfigurationUrl: https://auth.xzr.es/application/o/jenkins/.well-known/openid-configuration
+                      scopesOverride: openid email profile
                   userNameField: preferred_username
                   groupsFieldName: groups
-                  scopes: openid email profile
                   logoutFromOpenidProvider: true
               authorizationStrategy:
                 globalMatrix:
