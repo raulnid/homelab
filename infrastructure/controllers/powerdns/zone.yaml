@@ -1,0 +1,49 @@
+# Creates the xzr.es zone through the PowerDNS API if it doesn't exist (idempotent, re-runs so a deleted zone comes back).
+# Records are managed by external-dns, not here.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: powerdns-zone-xzr-es
+  namespace: powerdns
+spec:
+  schedule: "*/10 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      backoffLimit: 3
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: create-zone
+              image: curlimages/curl:8.11.1
+              env:
+                - name: PDNS_API_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: powerdns-secret
+                      key: api_key
+              command:
+                - sh
+                - -ec
+                - |
+                  api=http://powerdns-auth-api:8081/api/v1/servers/localhost/zones
+                  code=$(curl -s -o /dev/null -w '%{http_code}' -H "X-API-Key: $PDNS_API_KEY" $api/xzr.es.)
+                  [ "$code" = 200 ] && exit 0
+                  curl -sf -H "X-API-Key: $PDNS_API_KEY" -H 'Content-Type: application/json' $api \
+                    -d '{"name":"xzr.es.","kind":"Native","nameservers":["ns1.xzr.es."]}'
+              securityContext:
+                allowPrivilegeEscalation: false
+                runAsNonRoot: true
+                capabilities:
+                  drop: [ALL]
+                seccompProfile:
+                  type: RuntimeDefault
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 16Mi
+                limits:
+                  memory: 64Mi

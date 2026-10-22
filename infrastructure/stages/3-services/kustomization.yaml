@@ -7,5 +7,6 @@ resources:
   - ../../controllers/alloy
   - ../../controllers/loki
   - ../../controllers/valkey
+  - ../../controllers/external-dns
   - ../../controllers/forgejo
   - ../../controllers/jenkins
