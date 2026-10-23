@@ -10,5 +10,6 @@ resources:
   - ../../controllers/postgres/clusters
   - ../../controllers/powerdns
   - ../../controllers/powerdns-recursor
+  - ../../controllers/coredns
   # CiliumNetworkPolicies (default-deny) disabled until they're reviewed against this cluster
   # - ../../../components/network
