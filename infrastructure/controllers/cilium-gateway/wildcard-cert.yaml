@@ -1,0 +1,14 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: wildcard-tls
+  namespace: kube-system
+spec:
+  secretName: wildcard-tls
+  duration: 720h0m0s
+  renewBefore: 72h0m0s
+  issuerRef:
+    name: step-ca-issuer
+    kind: ClusterIssuer
+  dnsNames:
+    - "*.xzr.es"

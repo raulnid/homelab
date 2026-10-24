@@ -12,7 +12,6 @@ spec:
   parentRefs:
     - name: cilium-gateway
       namespace: kube-system
-      sectionName: http
   hostnames:
     - "hubble.xzr.es"
   rules:

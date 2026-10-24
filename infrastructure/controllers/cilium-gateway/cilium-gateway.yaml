@@ -15,3 +15,14 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
+    # no hostname: the wildcard covers every *.xzr.es route
+    - name: https
+      port: 443
+      protocol: HTTPS
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: wildcard-tls
+      allowedRoutes:
+        namespaces:
+          from: All

@@ -23,3 +23,7 @@ spec:
       enabled: false
     webhook:
       timeoutSeconds: 4
+    # DNS-01 self-checks against the recursor (it forwards xzr.es to powerdns-auth); public DNS is Cloudflare and never sees the TXT
+    extraArgs:
+      - --dns01-recursive-nameservers=192.168.1.250:53
+      - --dns01-recursive-nameservers-only

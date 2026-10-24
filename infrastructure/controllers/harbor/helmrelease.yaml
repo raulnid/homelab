@@ -31,7 +31,7 @@ spec:
       type: internal
     redis:
       type: internal
-    externalURL: http://hub.xzr.es
+    externalURL: https://hub.xzr.es
     harborAdminPassword: Harbor@12345
     persistence:
       enabled: true
