@@ -31,6 +31,27 @@ spec:
         - oic-auth
         # globalMatrix in the JCasC authorizationStrategy
         - matrix-auth
+        # the `jobs:` JCasC block below
+        - job-dsl
+      # JVM truststore = default cacerts + Homelab Root CA (auth.xzr.es is served with a step-ca cert)
+      javaOpts: >-
+        -Djavax.net.ssl.trustStore=/var/jenkins_truststore/cacerts
+        -Djavax.net.ssl.trustStorePassword=changeit
+      customInitContainers:
+        - name: truststore
+          image: "{{ .Values.controller.image.registry }}/{{ .Values.controller.image.repository }}:{{ .Chart.AppVersion }}-{{ .Values.controller.image.tagLabel }}"
+          command:
+            - sh
+            - -ec
+            - |
+              cp "$JAVA_HOME/lib/security/cacerts" /var/jenkins_truststore/cacerts
+              keytool -importcert -noprompt -alias homelab-root -file /homelab-root-ca/ca.crt \
+                -keystore /var/jenkins_truststore/cacerts -storepass changeit
+          volumeMounts:
+            - name: truststore
+              mountPath: /var/jenkins_truststore
+            - name: homelab-root-ca
+              mountPath: /homelab-root-ca
       containerEnv:
         - name: OIDC_CLIENT_SECRET
           valueFrom:
@@ -60,8 +81,42 @@ spec:
                         name: Jenkins Admins
                         permissions:
                           - Overall/Administer
+          jobs: |
+            jobs:
+              - script: |
+                  pipelineJob('wg-beacon') {
+                    description('Builds the wg-beacon client image and pushes it to hub.xzr.es/library/wg-beacon')
+                    properties {
+                      pipelineTriggers {
+                        triggers {
+                          pollSCM { scmpoll_spec('H/5 * * * *') }
+                        }
+                      }
+                    }
+                    definition {
+                      cpsScm {
+                        scm {
+                          git {
+                            remote { url('https://github.com/raulnid/wg-beacon.git') }
+                            branch('*/main')
+                          }
+                        }
+                        scriptPath('Jenkinsfile')
+                      }
+                    }
+                  }
     persistence:
       existingClaim: jenkins
+      volumes:
+        - name: truststore
+          emptyDir: {}
+        - name: homelab-root-ca
+          secret:
+            secretName: homelab-root-ca
+      mounts:
+        - name: truststore
+          mountPath: /var/jenkins_truststore
+          readOnly: true
     # Builds run in throwaway kaniko pods defined in each Jenkinsfile, so no default agent
     agent:
       enabled: false
