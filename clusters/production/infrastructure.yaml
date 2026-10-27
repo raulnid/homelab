@@ -6,7 +6,7 @@ metadata:
 spec:
   interval: 10m
   path: ./infrastructure/stages/1-operators
-  prune: false
+  prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
@@ -23,7 +23,7 @@ metadata:
 spec:
   interval: 10m
   path: ./infrastructure/stages/2-core
-  prune: false
+  prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
@@ -40,7 +40,7 @@ metadata:
 spec:
   interval: 10m
   path: ./infrastructure/stages/3-services
-  prune: false
+  prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
@@ -48,23 +48,3 @@ spec:
   wait: false
   dependsOn:
     - name: infra-core
----
-# LEGACY: only kept so flux-system doesn't delete it (with prune=true it would take everything down with it).
-# Once the infra-* ones are Ready: kubectl -n flux-system delete ks infrastructure (with prune=false it deletes nothing).
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
-metadata:
-  name: infrastructure
-  namespace: flux-system
-spec:
-  suspend: true
-  interval: 10m
-  path: ./infrastructure/controllers
-  prune: false
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
-    namespace: flux-system
-  wait: false
-  dependsOn:
-    - name: crds
