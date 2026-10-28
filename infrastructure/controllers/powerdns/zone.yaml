@@ -37,6 +37,8 @@ spec:
               securityContext:
                 allowPrivilegeEscalation: false
                 runAsNonRoot: true
+                # curlimages sets USER by name (curl_user), runAsNonRoot needs the numeric uid
+                runAsUser: 100
                 capabilities:
                   drop: [ALL]
                 seccompProfile:
