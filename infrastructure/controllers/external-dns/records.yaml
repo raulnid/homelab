@@ -29,3 +29,15 @@ spec:
     - { dnsName: ca.xzr.es,     recordType: A, targets: [192.168.1.242] }
     - { dnsName: loki.xzr.es,   recordType: A, targets: [192.168.1.243] }
     - { dnsName: valkey.xzr.es, recordType: A, targets: [192.168.1.244] }
+---
+# The apex exists internally (SOA/NS) so the CoreDNS NXDOMAIN fallback never kicks in for it; copy the public answer.
+# shortcut: static copy of Cloudflare's proxy IPs, update if `dig @1.1.1.1 xzr.es` ever changes.
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: apex
+  namespace: external-dns
+spec:
+  endpoints:
+    - { dnsName: xzr.es, recordType: A,    targets: [104.21.42.249, 172.67.214.20] }
+    - { dnsName: xzr.es, recordType: AAAA, targets: ["2606:4700:3035::ac43:d614", "2606:4700:3036::6815:2af9"] }
