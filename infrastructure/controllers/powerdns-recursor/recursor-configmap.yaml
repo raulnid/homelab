@@ -29,9 +29,13 @@ data:
         - zone: local
           forwarders:
             - 10.96.0.10
+      # Everything else goes to Cloudflare. _recurse sets RD=1: plain forward_zones asks non-recursively,
+      # which a public resolver only answers from its cache.
+      forward_zones_recurse:
         - zone: .
           forwarders:
             - 1.1.1.1
+            - 1.0.0.1
       # Enable system resolver so hostnames in forwarders are resolved via CoreDNS
       system_resolver_ttl: 60
       threads: 2

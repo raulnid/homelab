@@ -4,6 +4,8 @@ kind: Deployment
 metadata:
   name: powerdns-recursor
   namespace: powerdns
+  annotations:
+    reloader.stakater.com/auto: "true"
   labels:
     app.kubernetes.io/name: powerdns-recursor
     app.kubernetes.io/component: recursor
