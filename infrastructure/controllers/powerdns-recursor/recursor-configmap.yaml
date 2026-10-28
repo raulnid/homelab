@@ -26,9 +26,6 @@ data:
         - zone: cluster.local
           forwarders:
             - 10.96.0.10
-        - zone: local
-          forwarders:
-            - 10.96.0.10
       # Everything else goes to Cloudflare. _recurse sets RD=1: plain forward_zones asks non-recursively,
       # which a public resolver only answers from its cache.
       forward_zones_recurse:

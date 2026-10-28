@@ -1,6 +1,6 @@
-# kubeadm's CoreDNS config, taken over by Flux to add split-horizon for xzr.es:
-# the public zone lives in Cloudflare, inside the cluster we want the PowerDNS records (gateway/LB IPs).
-# Needed by step-ca (ACME DNS-01 checks), Jenkins (OIDC against auth.xzr.es) and kaniko (pushes to hub.xzr.es).
+# kubeadm's CoreDNS config, taken over by Flux: everything outside cluster.local goes to the powerdns-recursor
+# LB (.250), the same DNS the LAN uses. It answers xzr.es from powerdns-auth (LAN IPs; the public zone is
+# Cloudflare) and sends the rest to Cloudflare.
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -8,12 +8,6 @@ metadata:
   namespace: kube-system
 data:
   Corefile: |
-    xzr.es:53 {
-        errors
-        cache 30
-        # powerdns-recursor LB, it forwards xzr.es to powerdns-auth
-        forward . 192.168.1.250
-    }
     .:53 {
         errors
         health {
@@ -26,7 +20,7 @@ data:
            ttl 30
         }
         prometheus :9153
-        forward . /etc/resolv.conf {
+        forward . 192.168.1.250 {
            max_concurrent 1000
         }
         cache 30 {
