@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - helmrepo.yaml
+  - external-secrets.yaml
   - helmrelease.yaml
   - local-pv.yaml
   - httproute.yaml

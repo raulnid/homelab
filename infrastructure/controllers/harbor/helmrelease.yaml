@@ -22,6 +22,11 @@ spec:
   upgrade:
     remediation:
       retries: 3
+  # OIDC settings (with the client secret) rendered by the harbor-oidc ExternalSecret
+  valuesFrom:
+    - kind: Secret
+      name: harbor-oidc-values
+      valuesKey: values.yaml
   values:
     expose:
       type: clusterIP
@@ -32,7 +37,10 @@ spec:
     redis:
       type: internal
     externalURL: https://hub.xzr.es
-    harborAdminPassword: Harbor@12345
+    # only read on the first install; the real password lives in OpenBao (infra/harbor/admin)
+    existingSecretAdminPassword: harbor-admin
+    # trust the Homelab Root CA (OIDC against auth.xzr.es)
+    caBundleSecretName: homelab-root-ca
     persistence:
       enabled: true
       resourcePolicy: "keep"
