@@ -1,6 +1,7 @@
-# kubeadm's CoreDNS config, taken over by Flux: everything outside cluster.local goes to the powerdns-recursor
-# LB (.250), the same DNS the LAN uses. It answers xzr.es from powerdns-auth (LAN IPs; the public zone is
-# Cloudflare) and sends the rest to Cloudflare.
+# kubeadm's CoreDNS config, taken over by Flux.
+#  - xzr.es: internal records from powerdns-auth first; names it doesn't know (NXDOMAIN) fall back to the
+#    public zone in Cloudflare. The .250 recursor sends xzr.es here too, so the LAN gets the same answers.
+#  - everything else outside cluster.local: the powerdns-recursor LB (.250).
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -8,6 +9,15 @@ metadata:
   namespace: kube-system
 data:
   Corefile: |
+    xzr.es:53 {
+        errors
+        cache 30
+        # powerdns-auth-dns (ClusterIP pinned in powerdns/auth-service.yaml)
+        forward . 10.103.117.139 {
+            next NXDOMAIN
+        }
+        forward . 1.1.1.1 1.0.0.1
+    }
     .:53 {
         errors
         health {

@@ -11,6 +11,8 @@ metadata:
     app.kubernetes.io/part-of: powerdns
 spec:
   type: ClusterIP
+  # pinned: CoreDNS forwards xzr.es here and its forward plugin only takes IPs
+  clusterIP: 10.103.117.139
   ports:
   - name: dns-udp
     port: 53

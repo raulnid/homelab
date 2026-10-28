@@ -18,17 +18,19 @@ data:
 
     recursor:
       daemon: false
-      # Forward xzr.es queries to our Authoritative Server
+      # cluster.local for LAN clients, answered by CoreDNS
       forward_zones:
-        - zone: xzr.es
-          forwarders:
-            - powerdns-auth-dns.powerdns.svc.cluster.local
         - zone: cluster.local
           forwarders:
             - 10.96.0.10
-      # Everything else goes to Cloudflare. _recurse sets RD=1: plain forward_zones asks non-recursively,
-      # which a public resolver only answers from its cache.
+      # _recurse sets RD=1: plain forward_zones asks non-recursively, which a public resolver
+      # (and CoreDNS's own fallback to it) only answers from cache.
       forward_zones_recurse:
+        # xzr.es via CoreDNS: internal records first, Cloudflare for the names powerdns-auth doesn't know
+        - zone: xzr.es
+          forwarders:
+            - 10.96.0.10
+        # everything else
         - zone: .
           forwarders:
             - 1.1.1.1

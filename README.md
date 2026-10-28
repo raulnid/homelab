@@ -14,7 +14,7 @@ A three-node bare-metal Kubernetes cluster running in my home, built like produc
 - **Zero secrets in Git.** Every credential lives in OpenBao and reaches workloads through the External Secrets Operator. Database passwords are rotated by OpenBao every 24 hours.
 - **Private PKI with an offline root.** An offline root CA signs two name-constrained intermediates: step-ca for ACME and OpenBao for internal certificates. Every web service is served over HTTPS signed by that root, and the PostgreSQL clients verify the server's certificate against it (`verify-full`).
 - **Single sign-on everywhere.** authentik is the identity provider for OpenBao, Grafana, Harbor and Jenkins, and group membership in authentik decides who is an admin in each one.
-- **Split-horizon DNS.** The public `xzr.es` zone lives in Cloudflare. At home, the same names resolve to internal addresses through PowerDNS.
+- **Split-horizon DNS.** The public `xzr.es` zone lives in Cloudflare. At home, internal names resolve to LAN addresses through PowerDNS, and any name PowerDNS does not know falls through to the public zone.
 - **Encrypted cluster network.** Cilium encrypts node-to-node traffic with IPsec and enforces mutual authentication between workloads with SPIRE. Tetragon adds runtime security observability.
 - **Self-hosted delivery.** Jenkins pipelines defined as code build images with kaniko in ephemeral pods and push them to a private Harbor registry.
 
@@ -33,14 +33,15 @@ flowchart LR
         subgraph k8s[Kubernetes cluster]
             wg[WireGuard]
             gw[Cilium Gateway<br/>*.xzr.es TLS]
-            rec --> auth[PowerDNS Auth]
-            coredns[CoreDNS] --> rec
+            rec -->|xzr.es| coredns[CoreDNS]
+            coredns -->|internal first| auth[PowerDNS Auth]
             gw --> apps[Applications]
             gw --> platform[authentik / Harbor / Grafana<br/>Jenkins / Forgejo / OpenBao]
         end
     end
 
     rec -->|everything else| cfdns[1.1.1.1]
+    coredns -->|unknown xzr.es names| cfdns
 ```
 
 Public traffic enters through a VPS. The cluster dials out to it over WireGuard, so nothing has to be port-forwarded at home. Inside the house, a single Cilium Gateway terminates TLS for every `*.xzr.es` service, and Cilium LB-IPAM announces service IPs on the LAN over L2.
