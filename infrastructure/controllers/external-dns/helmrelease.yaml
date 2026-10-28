@@ -1,6 +1,4 @@
-# Publishes DNS records into PowerDNS from the cluster itself:
-#  - HTTPRoute hostnames -> the cilium-gateway LB IP (taken from the Gateway status)
-#  - LoadBalancer Services annotated external-dns.alpha.kubernetes.io/hostname -> their Cilium LB-IPAM IP
+# Publishes the hand-written DNSEndpoint records (records.yaml) into PowerDNS. Nothing is picked up automatically.
 # The zone (xzr.es) is created by the powerdns-zone-xzr-es CronJob; external-dns only manages records.
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
@@ -22,8 +20,7 @@ spec:
     provider:
       name: pdns
     sources:
-      - gateway-httproute
-      - service
+      - crd
     domainFilter:
       - xzr.es
     policy: sync

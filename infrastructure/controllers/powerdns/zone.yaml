@@ -1,5 +1,5 @@
 # Creates the xzr.es zone through the PowerDNS API if it doesn't exist (idempotent, re-runs so a deleted zone comes back).
-# Records are managed by external-dns, not here.
+# Records live in external-dns/records.yaml.
 apiVersion: batch/v1
 kind: CronJob
 metadata:

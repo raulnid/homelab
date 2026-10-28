@@ -1,8 +1,6 @@
 apiVersion: v1
 kind: Service
 metadata:
-  annotations:
-    external-dns.alpha.kubernetes.io/hostname: valkey.xzr.es
   name: valkey-external
   namespace: valkey
 spec:

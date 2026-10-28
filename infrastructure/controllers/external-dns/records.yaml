@@ -1,0 +1,30 @@
+# xzr.es records inside the LAN (public xzr.es is Cloudflare). Add a host here when you add a route or an LB.
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: gateway
+  namespace: external-dns
+spec:
+  endpoints:
+    # everything behind the cilium-gateway
+    - { dnsName: auth.xzr.es,    recordType: A, targets: [192.168.1.240] }
+    - { dnsName: dns.xzr.es,     recordType: A, targets: [192.168.1.240] }
+    - { dnsName: git.xzr.es,     recordType: A, targets: [192.168.1.240] }
+    - { dnsName: hub.xzr.es,     recordType: A, targets: [192.168.1.240] }
+    - { dnsName: hubble.xzr.es,  recordType: A, targets: [192.168.1.240] }
+    - { dnsName: jenkins.xzr.es, recordType: A, targets: [192.168.1.240] }
+    - { dnsName: mealie.xzr.es,  recordType: A, targets: [192.168.1.240] }
+    - { dnsName: siyuan.xzr.es,  recordType: A, targets: [192.168.1.240] }
+    - { dnsName: stats.xzr.es,   recordType: A, targets: [192.168.1.240] }
+    - { dnsName: vault.xzr.es,   recordType: A, targets: [192.168.1.240] }
+---
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: loadbalancers
+  namespace: external-dns
+spec:
+  endpoints:
+    - { dnsName: ca.xzr.es,     recordType: A, targets: [192.168.1.242] }
+    - { dnsName: loki.xzr.es,   recordType: A, targets: [192.168.1.243] }
+    - { dnsName: valkey.xzr.es, recordType: A, targets: [192.168.1.244] }
