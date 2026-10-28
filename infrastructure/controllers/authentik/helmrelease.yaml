@@ -95,11 +95,6 @@ spec:
             secretKeyRef:
               name: authentik-provider-secrets
               key: jenkins
-        - name: AUTHENTIK_PROVIDER_SECRET_HUBBLE
-          valueFrom:
-            secretKeyRef:
-              name: authentik-provider-secrets
-              key: hubble
 
       volumes:
         - name: pg-ca

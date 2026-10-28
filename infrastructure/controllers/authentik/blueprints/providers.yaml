@@ -170,48 +170,6 @@ entries:
     refresh_token_validity: days=30
     signing_key: !Find [authentik_crypto.certificatekeypair, [name, authentik Self-signed Certificate]]
     sub_mode: hashed_user_id
-- model: authentik_providers_oauth2.oauth2provider
-  state: present
-  identifiers:
-    name: Provider for Hubble
-  attrs:
-    access_code_validity: minutes=1
-    access_token_validity: hours=24
-    authentication_flow: null
-    authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
-    client_id: AMUCGaSWaO1qk7ZdKIz3dDTWapvZjxr6kPyuSwlA
-    client_secret: !Env 'AUTHENTIK_PROVIDER_SECRET_HUBBLE'
-    client_type: confidential
-    encryption_key: null
-    grant_types:
-    - authorization_code
-    - client_credentials
-    - password
-    include_claims_in_id_token: true
-    invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
-    issuer_mode: per_provider
-    jwt_federation_providers: []
-    jwt_federation_sources: []
-    logout_method: backchannel
-    logout_uri: ''
-    name: Provider for Hubble
-    property_mappings:
-    - !Find [authentik_providers_oauth2.scopemapping, [name, 'authentik default OAuth Mapping: Proxy outpost']]
-    - !Find [authentik_providers_oauth2.scopemapping, [name, 'authentik default OAuth Mapping: OpenID ''openid''']]
-    - !Find [authentik_providers_oauth2.scopemapping, [name, 'authentik default OAuth Mapping: OpenID ''email''']]
-    - !Find [authentik_providers_oauth2.scopemapping, [name, 'authentik default OAuth Mapping: OpenID ''profile''']]
-    - !Find [authentik_providers_oauth2.scopemapping, [name, 'authentik default OAuth Mapping: Application Entitlements']]
-    redirect_uris:
-    - matching_mode: strict
-      redirect_uri_type: authorization
-      url: https://hubble.xzr.es/outpost.goauthentik.io/callback?X-authentik-auth-callback=true
-    - matching_mode: strict
-      redirect_uri_type: authorization
-      url: https://hubble.xzr.es?X-authentik-auth-callback=true
-    refresh_token_threshold: seconds=0
-    refresh_token_validity: days=30
-    signing_key: null
-    sub_mode: hashed_user_id
 - model: authentik_providers_proxy.proxyprovider
   state: present
   identifiers:
