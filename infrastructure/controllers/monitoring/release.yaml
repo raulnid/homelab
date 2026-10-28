@@ -17,6 +17,34 @@ spec:
   values:
     grafana:
       enabled: true
+      # Login through authentik; role from the authentik groups, everyone else is Viewer
+      grafana.ini:
+        server:
+          root_url: https://stats.xzr.es
+        auth.generic_oauth:
+          enabled: true
+          name: authentik
+          client_id: mIr7eDVDhDscRrMIshwTH6fVhrG9kybB8D4naAxN
+          scopes: openid email profile
+          auth_url: https://auth.xzr.es/application/o/authorize/
+          token_url: https://auth.xzr.es/application/o/token/
+          api_url: https://auth.xzr.es/application/o/userinfo/
+          signout_redirect_url: https://auth.xzr.es/application/o/grafana/end-session/
+          login_attribute_path: preferred_username
+          role_attribute_path: contains(groups, 'Grafana Admins') && 'Admin' || contains(groups, 'Grafana Editors') && 'Editor' || 'Viewer'
+          use_pkce: true
+          # auth.xzr.es is served with a step-ca cert
+          tls_client_ca: /etc/grafana/homelab-root-ca/ca.crt
+      envValueFrom:
+        GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET:
+          secretKeyRef:
+            name: grafana-oidc
+            key: client_secret
+      extraSecretMounts:
+        - name: homelab-root-ca
+          secretName: homelab-root-ca
+          mountPath: /etc/grafana/homelab-root-ca
+          readOnly: true
       nodeSelector:
         monitoring-storage: "true"
       initChownData:
