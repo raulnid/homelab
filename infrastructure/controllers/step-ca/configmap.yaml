@@ -39,7 +39,11 @@ data:
           },
           {
             "type": "ACME",
-            "name": "acme"
+            "name": "acme",
+            "claims": {
+              "defaultTLSCertDuration": "720h",
+              "maxTLSCertDuration": "720h"
+            }
           }
         ],
         "template": {},
