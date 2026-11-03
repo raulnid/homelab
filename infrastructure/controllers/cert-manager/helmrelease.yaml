@@ -19,8 +19,11 @@ spec:
     crds: CreateReplace
   values:
     installCRDs: true
+    # metrics Service only; the ServiceMonitor lives in monitoring/ (its CRD comes with kube-prometheus-stack, a later stage)
     prometheus:
-      enabled: false
+      enabled: true
+      servicemonitor:
+        enabled: false
     webhook:
       timeoutSeconds: 4
     # DNS-01 self-checks against the recursor (it forwards xzr.es to powerdns-auth); public DNS is Cloudflare and never sees the TXT
