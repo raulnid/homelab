@@ -4,6 +4,7 @@ resources:
   - helmrelease.yaml
   - helmrepo.yaml
   - external-secrets.yaml
+  - certificate.yaml
   - namespace.yaml
   - httproute.yaml
   - hubble-route.yaml

@@ -99,6 +99,9 @@ spec:
             - name: secrets
               mountPath: /home/step/secrets
               readOnly: true
+            - name: pg-tls
+              mountPath: /home/step/pg-tls
+              readOnly: true
             - name: tmp
               mountPath: /tmp
       volumes:
@@ -123,5 +126,9 @@ spec:
                 path: intermediate_ca_key
               - key: password
                 path: password
+        - name: pg-tls
+          secret:
+            secretName: step-ca-pg-tls
+            defaultMode: 0440
         - name: tmp
           emptyDir: {}

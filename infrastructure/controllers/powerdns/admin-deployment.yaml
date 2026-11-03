@@ -65,7 +65,7 @@ spec:
                   name: powerdns-secret
                   key: database
             - name: SQLALCHEMY_DATABASE_URI
-              value: "postgresql://$(PDA_DB_USER):$(PDA_DB_PASSWORD)@$(PG_HOST):$(PG_PORT)/$(PDA_DB_NAME)?sslmode=verify-full&sslrootcert=/etc/pda/ssl-ca/ca.crt"
+              value: "postgresql://$(PDA_DB_USER):$(PDA_DB_PASSWORD)@$(PG_HOST):$(PG_PORT)/$(PDA_DB_NAME)?sslmode=verify-full&sslrootcert=/etc/pda/ssl-ca/ca.crt&sslcert=/etc/pda/ssl/tls.crt&sslkey=/etc/pda/ssl/tls.key"
             # Connection to the PowerDNS Auth API
             - name: PDNS_API_URL
               value: "http://powerdns-auth-api.powerdns.svc.cluster.local:8081"
@@ -86,6 +86,9 @@ spec:
             - name: db-ca
               mountPath: /etc/pda/ssl-ca
               readOnly: true
+            - name: db-tls
+              mountPath: /etc/pda/ssl
+              readOnly: true
           readinessProbe:
             httpGet:
               path: /
@@ -104,6 +107,10 @@ spec:
         - name: db-ca
           secret:
             secretName: powerdns-pg-ca
+        - name: db-tls
+          secret:
+            secretName: powerdns-pg-tls
+            defaultMode: 0440
 ---
 apiVersion: v1
 kind: Service

@@ -69,6 +69,10 @@ spec:
           value: verify-full
         - name: AUTHENTIK_POSTGRESQL__SSLROOTCERT
           value: /etc/authentik/pg-ca/ca.crt
+        - name: AUTHENTIK_POSTGRESQL__SSLCERT
+          value: /etc/authentik/pg-tls/tls.crt
+        - name: AUTHENTIK_POSTGRESQL__SSLKEY
+          value: /etc/authentik/pg-tls/tls.key
 
         - name: AUTHENTIK_PROVIDER_SECRET_FORGEJO
           valueFrom:
@@ -100,9 +104,16 @@ spec:
         - name: pg-ca
           secret:
             secretName: authentik-pg-ca
+        - name: pg-tls
+          secret:
+            secretName: authentik-pg-tls
+            defaultMode: 0440
       volumeMounts:
         - name: pg-ca
           mountPath: /etc/authentik/pg-ca
+          readOnly: true
+        - name: pg-tls
+          mountPath: /etc/authentik/pg-tls
           readOnly: true
 
     server:

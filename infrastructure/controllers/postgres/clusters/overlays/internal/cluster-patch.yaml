@@ -4,10 +4,18 @@ metadata:
   name: pg
 spec:
   instances: 3
-  # server cert from the OpenBao PKI; the client CA and the streaming_replica cert stay managed by the operator
+  # Every cert comes from the OpenBao PKI. Clients are validated against the Homelab Root CA, so the
+  # operator no longer runs its own client CA.
   certificates:
     serverTLSSecret: pg-server-tls
     serverCASecret: pg-server-ca
+    clientCASecret: pg-server-ca
+    replicationTLSSecret: pg-replica-tls
+  postgresql:
+    # App users need a client cert whose CN is their role name, on top of the password.
+    pg_hba:
+      - hostssl all dns,authentik,stepca all scram-sha-256 clientcert=verify-full
+      - host all dns,authentik,stepca all reject
   storage:
     size: 10Gi
     storageClass: postgres-local

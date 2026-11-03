@@ -20,7 +20,7 @@ data:
       },
       "db": {
         "type": "postgresql",
-        "dataSource": "postgres://__DB_USER__:__DB_PASSWORD__@pg-rw.pg-internal.svc.cluster.local:5432/stepca?sslmode=disable"
+        "dataSource": "postgres://__DB_USER__:__DB_PASSWORD__@pg-rw.pg-internal.svc.cluster.local:5432/stepca?sslmode=verify-full&sslrootcert=/home/step/certs/root_ca.crt&sslcert=/home/step/pg-tls/tls.crt&sslkey=/home/step/pg-tls/tls.key"
       },
       "authority": {
         "provisioners": [

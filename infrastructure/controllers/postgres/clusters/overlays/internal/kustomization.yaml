@@ -8,6 +8,7 @@ resources:
   - pv.yaml
   - service.yaml
   - certificate.yaml
+  - replica-certificate.yaml
   - external-secret.yaml
 patches:
   - path: cluster-patch.yaml

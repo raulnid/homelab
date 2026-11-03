@@ -9,4 +9,5 @@ resources:
   - admin-deployment.yaml
   - httproute.yaml
   - external-secrets.yaml
+  - certificate.yaml
   - zone.yaml
