@@ -21,6 +21,11 @@ spec:
     # was `mtu: 1400`: the chart key is uppercase, so it was ignored. 1500 = eno1 MTU, Cilium sizes the pods from it
     MTU: 1500
     kubeProxyReplacement: true
+    # Enforce the default-deny in components/network. `true` only logs would-be drops (verdict AUDIT in Hubble),
+    # except at the gateway: its L7 check of in-cluster clients drops even in audit mode.
+    policyAuditMode: false
+    # roll the agents when cilium-config changes (otherwise toggles like the one above need a manual restart)
+    rollOutCiliumPods: true
     gatewayAPI:
       enabled: true
     l2announcements:

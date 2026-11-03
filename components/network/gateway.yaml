@@ -1,0 +1,59 @@
+# Cilium Gateway (Envoy, identity "ingress") -> the backend of each HTTPRoute, on its target port only.
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: gateway-to-backends
+specs:
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: authentik, app.kubernetes.io/name: authentik, app.kubernetes.io/component: server } }
+    ingress: [{ fromEntities: [ingress], toPorts: [{ ports: [{ port: "9000", protocol: TCP }] }] }]
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: forgejo, app.kubernetes.io/name: forgejo } }
+    ingress: [{ fromEntities: [ingress], toPorts: [{ ports: [{ port: "3000", protocol: TCP }] }] }]
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: harbor, app: harbor, component: nginx } }
+    ingress: [{ fromEntities: [ingress], toPorts: [{ ports: [{ port: "8080", protocol: TCP }] }] }]
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: jenkins, app.kubernetes.io/component: jenkins-controller } }
+    ingress: [{ fromEntities: [ingress], toPorts: [{ ports: [{ port: "8080", protocol: TCP }] }] }]
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: mealie, app: mealie } }
+    ingress: [{ fromEntities: [ingress], toPorts: [{ ports: [{ port: "9000", protocol: TCP }] }] }]
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: monitoring, app.kubernetes.io/name: grafana } }
+    ingress: [{ fromEntities: [ingress], toPorts: [{ ports: [{ port: "3000", protocol: TCP }] }] }]
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: openbao, app.kubernetes.io/name: openbao, component: server } }
+    ingress: [{ fromEntities: [ingress], toPorts: [{ ports: [{ port: "8080", protocol: TCP }] }] }]
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: powerdns, app.kubernetes.io/name: powerdns-admin } }
+    ingress: [{ fromEntities: [ingress], toPorts: [{ ports: [{ port: "80", protocol: TCP }] }] }]
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: siyuan, app: siyuan } }
+    ingress: [{ fromEntities: [ingress], toPorts: [{ ports: [{ port: "6806", protocol: TCP }] }] }]
+---
+# Pods calling https://*.xzr.es go through the gateway VIP (OIDC back-channel to auth.xzr.es, kaniko pushing
+# to hub.xzr.es). Two checks apply on that path: L3/L4 from the pod to the "ingress" entity on 443, and then
+# Cilium's Envoy checks the pod's egress policy against the final backend at L7 and answers 403 if it isn't
+# allowed. That L7 check ignores audit mode, so both hops are listed here.
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: in-cluster-clients-via-gateway
+specs:
+  # OIDC relying parties -> auth.xzr.es
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: monitoring, app.kubernetes.io/name: grafana } }
+    egress: &oidc
+      - toEntities: [ingress]
+        toPorts: [{ ports: [{ port: "443", protocol: TCP }] }]
+      - toEndpoints: [{ matchLabels: { k8s:io.kubernetes.pod.namespace: authentik, app.kubernetes.io/name: authentik, app.kubernetes.io/component: server } }]
+        toPorts: [{ ports: [{ port: "9000", protocol: TCP }] }]
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: harbor, app: harbor, component: core } }
+    egress: *oidc
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: openbao, app.kubernetes.io/name: openbao, component: server } }
+    egress: *oidc
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: forgejo, app.kubernetes.io/name: forgejo } }
+    egress: *oidc
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: jenkins, app.kubernetes.io/component: jenkins-controller } }
+    egress: *oidc
+  # kaniko agents -> hub.xzr.es
+  - endpointSelector:
+      matchExpressions:
+        - { key: k8s:io.kubernetes.pod.namespace, operator: In, values: [jenkins] }
+        - { key: app.kubernetes.io/component, operator: DoesNotExist }
+    egress:
+      - toEntities: [ingress]
+        toPorts: [{ ports: [{ port: "443", protocol: TCP }] }]
+      - toEndpoints: [{ matchLabels: { k8s:io.kubernetes.pod.namespace: harbor, app: harbor, component: nginx } }]
+        toPorts: [{ ports: [{ port: "8080", protocol: TCP }] }]

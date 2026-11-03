@@ -11,5 +11,5 @@ resources:
   - ../../controllers/powerdns
   - ../../controllers/powerdns-recursor
   - ../../controllers/coredns
-  # CiliumNetworkPolicies (default-deny) disabled until they're reviewed against this cluster
-  # - ../../../components/network
+  # Cluster-wide default-deny plus per-flow allows (CiliumClusterwideNetworkPolicy)
+  - ../../../components/network

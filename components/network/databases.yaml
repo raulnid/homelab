@@ -1,0 +1,99 @@
+# Postgres (CNPG cluster pg-internal/pg). Only the primary takes client connections.
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: pg-primary-clients
+spec:
+  endpointSelector:
+    matchLabels:
+      k8s:io.kubernetes.pod.namespace: pg-internal
+      cnpg.io/cluster: pg
+      cnpg.io/instanceRole: primary
+  ingress:
+    - fromEndpoints:
+        - matchLabels: { k8s:io.kubernetes.pod.namespace: authentik, app.kubernetes.io/name: authentik }
+        - matchLabels: { k8s:io.kubernetes.pod.namespace: powerdns, app.kubernetes.io/name: powerdns-auth }
+        - matchLabels: { k8s:io.kubernetes.pod.namespace: powerdns, app.kubernetes.io/name: powerdns-admin }
+        - matchLabels: { k8s:io.kubernetes.pod.namespace: step-ca, app: step-ca }
+        # database secrets engine: static-role password rotation
+        - matchLabels: { k8s:io.kubernetes.pod.namespace: openbao, app.kubernetes.io/name: openbao, component: server }
+      toPorts: [{ ports: [{ port: "5432", protocol: TCP }] }]
+    # pg.xzr.es on the LAN through the 192.168.1.232 VIP
+    - fromEntities: [world]
+      toPorts: [{ ports: [{ port: "5432", protocol: TCP }] }]
+---
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: pg-clients
+specs:
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: authentik, app.kubernetes.io/name: authentik } }
+    egress: &toprimary
+      - toEndpoints: [{ matchLabels: { k8s:io.kubernetes.pod.namespace: pg-internal, cnpg.io/cluster: pg, cnpg.io/instanceRole: primary } }]
+        toPorts: [{ ports: [{ port: "5432", protocol: TCP }] }]
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: powerdns, app.kubernetes.io/name: powerdns-auth } }
+    egress: *toprimary
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: powerdns, app.kubernetes.io/name: powerdns-admin } }
+    egress: *toprimary
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: step-ca, app: step-ca } }
+    egress: *toprimary
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: openbao, app.kubernetes.io/name: openbao, component: server } }
+    egress: *toprimary
+---
+# Between instances: streaming replication (5432) and the instance manager status endpoint (8000).
+# The operator reaches every instance on the same two ports.
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: pg-instances
+spec:
+  endpointSelector:
+    matchLabels:
+      k8s:io.kubernetes.pod.namespace: pg-internal
+      cnpg.io/cluster: pg
+  ingress:
+    - fromEndpoints:
+        - matchLabels: { k8s:io.kubernetes.pod.namespace: pg-internal, cnpg.io/cluster: pg }
+        - matchLabels: { k8s:io.kubernetes.pod.namespace: cnpg-system, app.kubernetes.io/name: cloudnative-pg }
+      toPorts: &pgports
+        - ports:
+            - { port: "5432", protocol: TCP }
+            - { port: "8000", protocol: TCP }
+  egress:
+    - toEndpoints: [{ matchLabels: { k8s:io.kubernetes.pod.namespace: pg-internal, cnpg.io/cluster: pg } }]
+      toPorts: *pgports
+---
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: cnpg-operator
+spec:
+  endpointSelector:
+    matchLabels:
+      k8s:io.kubernetes.pod.namespace: cnpg-system
+      app.kubernetes.io/name: cloudnative-pg
+  egress:
+    - toEndpoints: [{ matchLabels: { k8s:io.kubernetes.pod.namespace: pg-internal, cnpg.io/cluster: pg } }]
+      toPorts:
+        - ports:
+            - { port: "5432", protocol: TCP }
+            - { port: "8000", protocol: TCP }
+---
+# Valkey: replication between its pods, clients on the LAN through the 192.168.1.244 VIP
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: valkey
+spec:
+  endpointSelector:
+    matchLabels:
+      k8s:io.kubernetes.pod.namespace: valkey
+      app.kubernetes.io/name: valkey
+  ingress:
+    - fromEndpoints: [{ matchLabels: { k8s:io.kubernetes.pod.namespace: valkey, app.kubernetes.io/name: valkey } }]
+      toPorts: [{ ports: [{ port: "6379", protocol: TCP }] }]
+    - fromEntities: [world]
+      toPorts: [{ ports: [{ port: "6379", protocol: TCP }] }]
+  egress:
+    - toEndpoints: [{ matchLabels: { k8s:io.kubernetes.pod.namespace: valkey, app.kubernetes.io/name: valkey } }]
+      toPorts: [{ ports: [{ port: "6379", protocol: TCP }] }]

@@ -21,29 +21,6 @@ spec:
   upgrade:
     remediation:
       retries: 3
-  # WATCH OUT gitea/forgejo chart: deployment.labels ALSO ends up in
-  # spec.selector.matchLabels (immutable field) -> breaks the upgrade of the
-  # existing Deployment. Cilium net/* labels go only on the pod template via
-  # post-render; the selector stays name+instance (valid subset)
-  # and the pod keeps net/from-public-gw (apps-ingress-from-public-gateway)
-  # and net/to-authentik (apps-egress-to-authentik).
-  postRenderers:
-    - kustomize:
-        patches:
-          - target:
-              kind: Deployment
-              name: forgejo
-            patch: |
-              apiVersion: apps/v1
-              kind: Deployment
-              metadata:
-                name: forgejo
-              spec:
-                template:
-                  metadata:
-                    labels:
-                      net/from-public-gw: "true"
-                      net/to-authentik: "true"
   values:
     replicaCount: 1
 
@@ -91,8 +68,7 @@ spec:
         readOnly: true
 
     deployment:
-      # DON'T put the net/* labels here: this chart copies deployment.labels to
-      # spec.selector.matchLabels (immutable). They go through postRenderers (above).
+      # deployment.labels would also land in spec.selector.matchLabels (immutable): keep labels out of here
       env:
         - name: SSL_CERT_DIR
           value: /etc/ssl/certs:/etc/forgejo/ca

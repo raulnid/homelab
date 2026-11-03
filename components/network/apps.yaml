@@ -1,0 +1,84 @@
+# Harbor: nine components talking to each other (nginx, core, portal, registry, jobservice, redis,
+# database, trivy, exporter), so the boundary is the namespace. Only trivy goes out (vulnerability DB).
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: harbor
+specs:
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: harbor } }
+    ingress: [{ fromEndpoints: [{ matchLabels: { k8s:io.kubernetes.pod.namespace: harbor } }] }]
+    egress: [{ toEndpoints: [{ matchLabels: { k8s:io.kubernetes.pod.namespace: harbor } }] }]
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: harbor, component: trivy } }
+    egress: [{ toEntities: [world], toPorts: [{ ports: [{ port: "443", protocol: TCP }] }] }]
+---
+# Jenkins: plugin mirrors and GitHub; kaniko agents connect back to the controller and pull bases from
+# public registries. Their push to hub.xzr.es is in gateway.yaml.
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: jenkins
+specs:
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: jenkins, app.kubernetes.io/component: jenkins-controller } }
+    egress: [{ toEntities: [world], toPorts: [{ ports: [{ port: "443", protocol: TCP }] }] }]
+    ingress:
+      - fromEndpoints:
+          - matchExpressions:
+              - { key: k8s:io.kubernetes.pod.namespace, operator: In, values: [jenkins] }
+              - { key: app.kubernetes.io/component, operator: DoesNotExist }
+        toPorts:
+          - ports:
+              - { port: "8080", protocol: TCP }
+              - { port: "50000", protocol: TCP }
+  - endpointSelector:
+      matchExpressions:
+        - { key: k8s:io.kubernetes.pod.namespace, operator: In, values: [jenkins] }
+        - { key: app.kubernetes.io/component, operator: DoesNotExist }
+    egress:
+      - toEndpoints: [{ matchLabels: { k8s:io.kubernetes.pod.namespace: jenkins, app.kubernetes.io/component: jenkins-controller } }]
+        toPorts:
+          - ports:
+              - { port: "8080", protocol: TCP }
+              - { port: "50000", protocol: TCP }
+      - toEntities: [world]
+        toPorts: [{ ports: [{ port: "443", protocol: TCP }] }]
+---
+# Forgejo: pull mirrors from GitHub over HTTPS (no SSH remotes)
+# Mealie: recipe import fetches arbitrary sites
+# `world` on 443/80 and not toFQDNs: toFQDNs puts every DNS answer through Cilium's L7 proxy.
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: web-egress
+specs:
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: forgejo, app.kubernetes.io/name: forgejo } }
+    egress: [{ toEntities: [world], toPorts: [{ ports: [{ port: "443", protocol: TCP }] }] }]
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: mealie, app: mealie } }
+    egress:
+      - toEntities: [world]
+        toPorts:
+          - ports:
+              - { port: "443", protocol: TCP }
+              - { port: "80", protocol: TCP }
+---
+# WireGuard to the Hetzner VPS. The pod routes what the VPS forwards through the tunnel and
+# masquerades it: the Minecraft server on the nodes (25565) and a LAN service on 8081.
+# LAN clients can also join through the 192.168.1.241 VIP (51822/UDP).
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: wireguard
+spec:
+  endpointSelector:
+    matchLabels:
+      k8s:io.kubernetes.pod.namespace: wireguard
+      app: wireguard
+  ingress:
+    - fromEntities: [world]
+      toPorts: [{ ports: [{ port: "51822", protocol: UDP }] }]
+  egress:
+    - toCIDR: ["${VPS_IP}/32"]  # from the cluster-vars Secret, keeps the VPS address out of Git
+      toPorts: [{ ports: [{ port: "51820", protocol: UDP }] }]
+    - toEntities: [host, remote-node]
+      toPorts: [{ ports: [{ port: "25565", protocol: TCP }] }]
+    - toCIDR: [192.168.1.0/24]
+      toPorts: [{ ports: [{ port: "8081", protocol: TCP }] }]

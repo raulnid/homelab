@@ -1,0 +1,100 @@
+# DNS chain:
+#   pods -> CoreDNS -> xzr.es: powerdns-auth, unknown xzr.es names and the rest: 1.1.1.1 / recursor
+#   LAN  -> 192.168.1.250 (recursor) -> xzr.es and cluster.local: CoreDNS, everything else: 1.1.1.1
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: coredns-egress
+spec:
+  endpointSelector:
+    matchLabels:
+      k8s:io.kubernetes.pod.namespace: kube-system
+      k8s:k8s-app: kube-dns
+  egress:
+    - toEndpoints:
+        - matchLabels: { k8s:io.kubernetes.pod.namespace: powerdns, app.kubernetes.io/name: powerdns-auth }
+        - matchLabels: { k8s:io.kubernetes.pod.namespace: powerdns, app.kubernetes.io/name: powerdns-recursor }
+      toPorts:
+        - ports:
+            - { port: "1053", protocol: UDP }
+            - { port: "1053", protocol: TCP }
+    - toCIDR: [1.1.1.1/32, 1.0.0.1/32]
+      toPorts:
+        - ports:
+            - { port: "53", protocol: UDP }
+            - { port: "53", protocol: TCP }
+---
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: powerdns-recursor
+spec:
+  endpointSelector:
+    matchLabels:
+      k8s:io.kubernetes.pod.namespace: powerdns
+      app.kubernetes.io/name: powerdns-recursor
+  ingress:
+    # CoreDNS, cert-manager's DNS-01 self-check, the nodes, and the LAN through the .250 VIP.
+    # LAN clients arrive SNATed by the node that holds the VIP, so they show up as "world".
+    - fromEndpoints:
+        - matchLabels: { k8s:io.kubernetes.pod.namespace: kube-system, k8s:k8s-app: kube-dns }
+        - matchLabels: { k8s:io.kubernetes.pod.namespace: cert-manager, app.kubernetes.io/name: cert-manager }
+      toPorts: &dns1053
+        - ports:
+            - { port: "1053", protocol: UDP }
+            - { port: "1053", protocol: TCP }
+    - fromEntities: [host, remote-node, world]
+      toPorts: *dns1053
+  egress:
+    - toCIDR: [1.1.1.1/32, 1.0.0.1/32]
+      toPorts:
+        - ports:
+            - { port: "53", protocol: UDP }
+            - { port: "53", protocol: TCP }
+---
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: powerdns-auth
+spec:
+  endpointSelector:
+    matchLabels:
+      k8s:io.kubernetes.pod.namespace: powerdns
+      app.kubernetes.io/name: powerdns-auth
+  ingress:
+    - fromEndpoints:
+        - matchLabels: { k8s:io.kubernetes.pod.namespace: kube-system, k8s:k8s-app: kube-dns }
+      toPorts:
+        - ports:
+            - { port: "1053", protocol: UDP }
+            - { port: "1053", protocol: TCP }
+    # HTTP API: external-dns, the DNS-01 webhook, the admin panel and the zone CronJob
+    - fromEndpoints:
+        - matchLabels: { k8s:io.kubernetes.pod.namespace: external-dns, app.kubernetes.io/name: external-dns }
+        - matchLabels: { k8s:io.kubernetes.pod.namespace: cert-manager, app.kubernetes.io/name: cert-manager-webhook-pdns }
+        - matchLabels: { k8s:io.kubernetes.pod.namespace: powerdns, app.kubernetes.io/name: powerdns-admin }
+        - matchExpressions:
+            - { key: k8s:io.kubernetes.pod.namespace, operator: In, values: [powerdns] }
+            - { key: batch.kubernetes.io/job-name, operator: Exists }
+      toPorts:
+        - ports:
+            - { port: "8081", protocol: TCP }
+---
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: powerdns-api-clients
+specs:
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: external-dns, app.kubernetes.io/name: external-dns } }
+    egress: &pdnsapi
+      - toEndpoints: [{ matchLabels: { k8s:io.kubernetes.pod.namespace: powerdns, app.kubernetes.io/name: powerdns-auth } }]
+        toPorts: [{ ports: [{ port: "8081", protocol: TCP }] }]
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: cert-manager, app.kubernetes.io/name: cert-manager-webhook-pdns } }
+    egress: *pdnsapi
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: powerdns, app.kubernetes.io/name: powerdns-admin } }
+    egress: *pdnsapi
+  - endpointSelector:
+      matchExpressions:
+        - { key: k8s:io.kubernetes.pod.namespace, operator: In, values: [powerdns] }
+        - { key: batch.kubernetes.io/job-name, operator: Exists }
+    egress: *pdnsapi

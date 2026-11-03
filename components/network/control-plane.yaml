@@ -1,0 +1,92 @@
+# kube-apiserver (192.168.1.20). From pods on other nodes it is "kube-apiserver"/"remote-node",
+# from pods on node1 it is "host" (already allowed by default-deny).
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: apiserver-clients
+spec:
+  endpointSelector:
+    matchExpressions:
+      - key: k8s:io.kubernetes.pod.namespace
+        operator: In
+        values:
+          - authentik          # outpost integration
+          - cert-manager
+          - cilium-spire
+          - cnpg-system
+          - external-dns
+          - external-secrets
+          - jenkins            # kubernetes plugin (kaniko agents)
+          - kube-system        # coredns, hubble, tetragon-operator
+          - local-path-storage
+          - logging            # alloy discovery
+          - monitoring         # prometheus-operator, kube-state-metrics, grafana sidecar, prometheus SD
+          - openbao            # TokenReview for the kubernetes auth method
+          - pg-internal        # CNPG instance manager
+          - reloader
+  egress:
+    - toEntities: [kube-apiserver, remote-node]
+      toPorts:
+        - ports:
+            - { port: "6443", protocol: TCP }
+---
+# Admission webhooks and APIServices called by the apiserver
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: apiserver-to-webhooks
+specs:
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: cert-manager, app.kubernetes.io/name: webhook } }
+    ingress: [{ fromEntities: [kube-apiserver, remote-node, host], toPorts: [{ ports: [{ port: "10250", protocol: TCP }] }] }]
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: cert-manager, app.kubernetes.io/name: cert-manager-webhook-pdns } }
+    ingress: [{ fromEntities: [kube-apiserver, remote-node, host], toPorts: [{ ports: [{ port: "8443", protocol: TCP }] }] }]
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: external-secrets, app.kubernetes.io/name: external-secrets-webhook } }
+    ingress: [{ fromEntities: [kube-apiserver, remote-node, host], toPorts: [{ ports: [{ port: "10250", protocol: TCP }] }] }]
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: cnpg-system, app.kubernetes.io/name: cloudnative-pg } }
+    ingress: [{ fromEntities: [kube-apiserver, remote-node, host], toPorts: [{ ports: [{ port: "9443", protocol: TCP }] }] }]
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: monitoring, app.kubernetes.io/name: kube-prometheus-stack-prometheus-operator } }
+    ingress: [{ fromEntities: [kube-apiserver, remote-node, host], toPorts: [{ ports: [{ port: "10250", protocol: TCP }] }] }]
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: openbao, app.kubernetes.io/name: openbao-agent-injector } }
+    ingress: [{ fromEntities: [kube-apiserver, remote-node, host], toPorts: [{ ports: [{ port: "8080", protocol: TCP }] }] }]
+---
+# SPIRE agents run on the host network of every node
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: spire-server
+spec:
+  endpointSelector:
+    matchLabels:
+      k8s:io.kubernetes.pod.namespace: cilium-spire
+      app: spire-server
+  ingress:
+    - fromEntities: [host, remote-node]
+      toPorts:
+        - ports:
+            - { port: "8081", protocol: TCP }
+---
+# Hubble: relay reads every agent (host network, :4244), the UI reads the relay
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: hubble
+specs:
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: kube-system, k8s:k8s-app: hubble-relay } }
+    egress:
+      - toEntities: [host, remote-node]
+        toPorts: [{ ports: [{ port: "4244", protocol: TCP }] }]
+    ingress:
+      - fromEndpoints: [{ matchLabels: { k8s:io.kubernetes.pod.namespace: kube-system, k8s:k8s-app: hubble-ui } }]
+        toPorts: [{ ports: [{ port: "4245", protocol: TCP }] }]
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: kube-system, k8s:k8s-app: hubble-ui } }
+    egress:
+      - toEndpoints: [{ matchLabels: { k8s:io.kubernetes.pod.namespace: kube-system, k8s:k8s-app: hubble-relay } }]
+        toPorts: [{ ports: [{ port: "4245", protocol: TCP }] }]
+    # authentik's embedded outpost proxies hubble.xzr.es after login
+    ingress:
+      - fromEndpoints: [{ matchLabels: { k8s:io.kubernetes.pod.namespace: authentik, app.kubernetes.io/name: authentik, app.kubernetes.io/component: server } }]
+        toPorts: [{ ports: [{ port: "8081", protocol: TCP }] }]
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: authentik, app.kubernetes.io/name: authentik, app.kubernetes.io/component: server } }
+    egress:
+      - toEndpoints: [{ matchLabels: { k8s:io.kubernetes.pod.namespace: kube-system, k8s:k8s-app: hubble-ui } }]
+        toPorts: [{ ports: [{ port: "8081", protocol: TCP }] }]

@@ -29,6 +29,11 @@ spec:
     name: flux-system
     namespace: flux-system
   wait: false
+  # components/network reads VPS_IP; nothing else in this stage uses ${...}
+  postBuild:
+    substituteFrom:
+      - kind: Secret
+        name: cluster-vars
   dependsOn:
     - name: infra-operators
 ---

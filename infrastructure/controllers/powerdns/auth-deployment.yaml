@@ -22,7 +22,6 @@ spec:
       labels:
         app.kubernetes.io/name: powerdns-auth
         app.kubernetes.io/component: dns-server
-        net/to-cnpg-internal: "true"
         app.kubernetes.io/part-of: powerdns
     spec:
       securityContext:

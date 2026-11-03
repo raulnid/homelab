@@ -118,11 +118,6 @@ spec:
 
     server:
       replicas: 1
-      podLabels:
-        net/from-public-gw: "true"
-        # The embedded outpost proxies to hubble-ui (kube-system:8081) after authenticating.
-        net/to-hubble: "true"
-        net/to-cnpg-internal: "true"
       resources:
         requests:
           cpu: 100m
@@ -131,8 +126,6 @@ spec:
           memory: 1Gi
 
     worker:
-      podLabels:
-        net/to-cnpg-internal: "true"
       replicas: 1
       resources:
         requests:

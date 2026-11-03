@@ -22,9 +22,7 @@ spec:
       labels:
         app.kubernetes.io/name: powerdns-admin
         app.kubernetes.io/component: web-panel
-        net/to-cnpg-internal: "true"
         app.kubernetes.io/part-of: powerdns
-        net/from-public-gw: "true"
     spec:
       securityContext:
         # libpq wants the key with restricted permissions: root-owned 0640 with
