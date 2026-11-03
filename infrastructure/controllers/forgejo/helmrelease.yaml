@@ -84,6 +84,11 @@ spec:
       - name: internal-ca
         mountPath: /etc/forgejo/ca
         readOnly: true
+    # configure-gitea fetches the OIDC discovery from auth.xzr.es when it creates the auth source
+    extraInitVolumeMounts:
+      - name: internal-ca
+        mountPath: /etc/forgejo/ca
+        readOnly: true
 
     deployment:
       # DON'T put the net/* labels here: this chart copies deployment.labels to
