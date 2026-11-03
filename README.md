@@ -12,10 +12,10 @@ A three-node bare-metal Kubernetes cluster running in my home, built like produc
 
 - **GitOps end to end.** FluxCD reconciles the whole cluster from this repository in dependency-ordered stages. Pruning is on, so Git is the only source of truth.
 - **Zero secrets in Git.** Every credential lives in OpenBao and reaches workloads through the External Secrets Operator. Database passwords are rotated by OpenBao every 24 hours.
-- **Private PKI with an offline root.** An offline root CA signs two name-constrained intermediates: step-ca for ACME and OpenBao for internal certificates. Every web service is served over HTTPS signed by that root, and the PostgreSQL clients verify the server's certificate against it (`verify-full`).
-- **Single sign-on everywhere.** authentik is the identity provider for OpenBao, Grafana, Harbor and Jenkins, and group membership in authentik decides who is an admin in each one.
+- **Private PKI with an offline root.** An offline root CA signs two name-constrained intermediates: step-ca for ACME and OpenBao for internal certificates. Every web service is served over HTTPS signed by that root, and PostgreSQL uses mutual TLS: clients verify the server (`verify-full`) and present a 24-hour client certificate whose CN must match their role, on top of the password.
+- **Single sign-on.** authentik is the identity provider for OpenBao, Grafana, Harbor, Jenkins and Forgejo, and fronts Hubble through its proxy. Group membership in authentik decides who is an admin in each one.
 - **Split-horizon DNS.** The public `xzr.es` zone lives in Cloudflare. At home, internal names resolve to LAN addresses through PowerDNS, and any name PowerDNS does not know falls through to the public zone.
-- **Encrypted cluster network.** Cilium encrypts node-to-node traffic with IPsec and enforces mutual authentication between workloads with SPIRE. Tetragon adds runtime security observability.
+- **Default-deny network.** Every pod starts with no ingress and no egress. Each flow is an explicit Cilium policy pinned to pod labels and ports, built from what Hubble observed in audit mode before enforcing. Node-to-node traffic is encrypted with IPsec, and Tetragon adds runtime security observability.
 - **Self-hosted delivery.** Jenkins pipelines defined as code build images with kaniko in ephemeral pods and push them to a private Harbor registry.
 
 ## Architecture
@@ -116,11 +116,11 @@ clusters/production/         Flux entry point: stage Kustomizations and CRDs
 infrastructure/stages/       What each stage deploys
 infrastructure/controllers/  One directory per platform component
 apps/production/             Applications
-components/                  Reusable Kustomize components (network policies, pod security)
+components/                  Default-deny network policies, pod security admission
 ```
 
 ## Roadmap
 
-- Enable the default-deny CiliumNetworkPolicy set in `components/network`.
-- Wire Forgejo and Hubble into authentik.
-- Mutual TLS from applications to PostgreSQL with client certificates from the OpenBao PKI.
+- Require SPIRE mutual authentication on the pod-to-pod allows (SPIRE is deployed, the policies don't ask for it yet).
+- Off-cluster backups: CNPG to object storage and OpenBao raft snapshots, with a tested restore.
+- SSO for Mealie and PowerDNS-Admin.
