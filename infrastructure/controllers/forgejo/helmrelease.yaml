@@ -99,6 +99,15 @@ spec:
           DOMAIN: git.xzr.es
           ROOT_URL: https://git.xzr.es/
           SSH_DOMAIN: git.xzr.es
+        service:
+          # local accounts only through authentik; the admin from the chart stays for break-glass
+          DISABLE_REGISTRATION: false
+          ALLOW_ONLY_EXTERNAL_REGISTRATION: true
+          SHOW_REGISTRATION_BUTTON: false
+        oauth2_client:
+          ENABLE_AUTO_REGISTRATION: true
+          USERNAME: nickname
+          ACCOUNT_LINKING: login
 
       metrics:
         enabled: true
@@ -106,9 +115,16 @@ spec:
           enabled: true
           namespace: "monitoring"
 
-      service:
-        ENABLE_OPENID_SINGIN: true
-        ENABLE_OPENID_SINGUP: true
+      # Login through authentik. The name must match the callback in the authentik blueprint
+      # (https://git.xzr.es/user/oauth2/Authentik/callback).
+      oauth:
+        - name: Authentik
+          provider: openidConnect
+          existingSecret: forgejo-oidc
+          autoDiscoverUrl: https://auth.xzr.es/application/o/forgejo/.well-known/openid-configuration
+          scopes: "openid email profile"
+          groupClaimName: groups
+          adminGroup: Forgejo Owner
 
     resources:
       requests:
