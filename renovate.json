@@ -1,0 +1,77 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":dependencyDashboard",
+    ":semanticCommitTypeAll(chore)"
+  ],
+  "timezone": "Europe/Madrid",
+  "schedule": [
+    "after 5pm every weekday",
+    "every weekend"
+  ],
+  "prConcurrentLimit": 5,
+  "flux": {
+    "managerFilePatterns": [
+      "/^infrastructure\\/.+\\.ya?ml$/",
+      "/^clusters\\/.+\\.ya?ml$/",
+      "/^apps\\/.+\\.ya?ml$/"
+    ]
+  },
+  "kubernetes": {
+    "managerFilePatterns": [
+      "/^infrastructure\\/.+\\.ya?ml$/",
+      "/^apps\\/.+\\.ya?ml$/"
+    ]
+  },
+  "packageRules": [
+    {
+      "description": "Major bumps of stateful or core components wait for a manual look at the upgrade notes",
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "dependencyDashboardApproval": true
+    },
+    {
+      "description": "One PR per cert-manager bump: chart and CRD URL must move together",
+      "matchPackageNames": [
+        "cert-manager",
+        "cert-manager/cert-manager"
+      ],
+      "groupName": "cert-manager"
+    },
+    {
+      "description": "Digest-pinned :latest images: one weekly PR",
+      "matchUpdateTypes": [
+        "digest"
+      ],
+      "groupName": "image digests",
+      "schedule": [
+        "every weekend"
+      ]
+    },
+    {
+      "matchDatasources": [
+        "docker"
+      ],
+      "matchPackageNames": [
+        "powerdnsadmin/pda-legacy"
+      ],
+      "sourceUrl": "https://github.com/PowerDNS-Admin/PowerDNS-Admin"
+    }
+  ],
+  "customManagers": [
+    {
+      "description": "CRD bundles pulled from GitHub release / tag URLs in the crds stage",
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^clusters\\/production\\/crd\\/kustomization\\.yaml$/"
+      ],
+      "matchStrings": [
+        "https://github\\.com/(?<depName>[^/]+/[^/]+)/releases/download/(?<currentValue>v[^/]+)/",
+        "https://raw\\.githubusercontent\\.com/(?<depName>[^/]+/[^/]+)/(?<currentValue>v[^/]+)/"
+      ],
+      "datasourceTemplate": "github-releases"
+    }
+  ]
+}
