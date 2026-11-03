@@ -21,6 +21,15 @@ spec:
       grafana.ini:
         server:
           root_url: https://stats.xzr.es
+        # no calls to grafana.com (the default-deny gives Grafana no internet egress)
+        analytics:
+          reporting_enabled: false
+          check_for_updates: false
+          check_for_plugin_updates: false
+        plugins:
+          preinstall_disabled: true
+        news:
+          news_feed_enabled: false
         auth.generic_oauth:
           enabled: true
           name: authentik
@@ -80,6 +89,15 @@ spec:
               resources:
                 requests:
                   storage: 20Gi
+    # kube-proxy is replaced by Cilium; etcd, scheduler and controller-manager listen on localhost only
+    kubeProxy:
+      enabled: false
+    kubeEtcd:
+      enabled: false
+    kubeScheduler:
+      enabled: false
+    kubeControllerManager:
+      enabled: false
     alertmanager:
       enabled: true
     nodeExporter:
