@@ -29,7 +29,7 @@ spec:
         fsGroup: 953
       containers:
         - name: pdns-auth
-          image: powerdns/pdns-auth-49:latest
+          image: powerdns/pdns-auth-49:4.9.18
           args:
             - --config-dir=/etc/powerdns
             - --gpgsql-host=$(PGHOST)

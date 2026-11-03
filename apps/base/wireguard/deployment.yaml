@@ -19,7 +19,7 @@ spec:
           effect: NoSchedule
       containers:
         - name: wireguard
-          image: ghcr.io/linuxserver/wireguard:latest
+          image: ghcr.io/linuxserver/wireguard:latest@sha256:216ca1ce9da7bfe26fb752111d952487804bd18933bbd4794970d424bf8adfe9
           env:
             - name: PUID
               value: "1000"

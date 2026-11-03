@@ -25,7 +25,7 @@ spec:
     spec:
       containers:
       - name: pdns-recursor
-        image: powerdns/pdns-recursor-51:latest
+        image: powerdns/pdns-recursor-51:5.1.10
         args:
           - --config-dir=/etc/powerdns-recursor
         ports:

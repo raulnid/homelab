@@ -32,7 +32,7 @@ spec:
         fsGroup: 953
       containers:
         - name: powerdns-admin
-          image: powerdnsadmin/pda-legacy:latest
+          image: powerdnsadmin/pda-legacy:latest@sha256:5bcea2c641d04f25792cf2eba84eef2b30d9618f1756102ec808e336d6f07c1a
           ports:
             - name: http
               containerPort: 80

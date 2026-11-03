@@ -18,7 +18,7 @@ spec:
   chart:
     spec:
       chart: cloudnative-pg
-      version: "0.26.1" # pinned, renovate will change later
+      version: "0.26.1"
       sourceRef:
         kind: HelmRepository
         name: cnpg

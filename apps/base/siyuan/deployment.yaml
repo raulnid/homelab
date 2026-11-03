@@ -18,7 +18,7 @@ spec:
         fsGroup: 1000
       containers:
         - name: siyuan
-          image: b3log/siyuan:latest
+          image: b3log/siyuan:latest@sha256:1a316554bfbf0c951ddabc7d3cb0292620152b44c087b6979d5d9b6bae065b1b
           ports:
             - containerPort: 6806
           command:
