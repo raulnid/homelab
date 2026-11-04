@@ -60,6 +60,16 @@ specs:
               - { port: "443", protocol: TCP }
               - { port: "80", protocol: TCP }
 ---
+# Stremio: addons over HTTPS and BitTorrent peers on whatever port they announce (TCP and UDP),
+# so no port list.
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: stremio
+spec:
+  endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: stremio, app: stremio } }
+  egress: [{ toEntities: [world] }]
+---
 # WireGuard to the Hetzner VPS. The pod routes what the VPS forwards through the tunnel and
 # masquerades it: the Minecraft server on the nodes (25565) and a LAN service on 8081.
 # LAN clients can also join through the 192.168.1.241 VIP (51822/UDP).

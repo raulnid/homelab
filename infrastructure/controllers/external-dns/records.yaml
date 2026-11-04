@@ -16,6 +16,7 @@ spec:
     - { dnsName: mealie.xzr.es,  recordType: A, targets: [192.168.1.240] }
     - { dnsName: siyuan.xzr.es,  recordType: A, targets: [192.168.1.240] }
     - { dnsName: stats.xzr.es,   recordType: A, targets: [192.168.1.240] }
+    - { dnsName: stremio.xzr.es, recordType: A, targets: [192.168.1.240] }
     - { dnsName: vault.xzr.es,   recordType: A, targets: [192.168.1.240] }
 ---
 apiVersion: externaldns.k8s.io/v1alpha1
