@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: stremio
+spec:
+  selector:
+    app: stremio
+  ports:
+    - { name: web, port: 8080, targetPort: 8080 }
+    - { name: server, port: 11470, targetPort: 11470 }

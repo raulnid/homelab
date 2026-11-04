@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stremio
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: stremio
+  template:
+    metadata:
+      labels:
+        app: stremio
+    spec:
+      containers:
+        - name: stremio
+          image: tsaridas/stremio-docker:latest@sha256:7410ae8f02b6220cf86d6ab716116d38aed5993ee9fc1d31fbe80e043673ea6d
+          env:
+            # same as the Docker container: the web UI uses the server on the URL it was opened from
+            - { name: NO_CORS, value: "1" }
+            - { name: AUTO_SERVER_URL, value: "1" }
+          ports:
+            - { name: web, containerPort: 8080 }
+            - { name: server, containerPort: 11470 }
+          volumeMounts:
+            - name: data
+              mountPath: /root/.stremio-server
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "2Gi"
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: stremio-data

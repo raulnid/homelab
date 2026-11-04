@@ -1,0 +1,12 @@
+# Server settings and the torrent cache. Nothing worth migrating from Docker (320K of settings).
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: stremio-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 5Gi
