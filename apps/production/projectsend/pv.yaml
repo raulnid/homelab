@@ -1,0 +1,73 @@
+# Copied from patron's Docker setup onto its data disk (sdb, /home/xzr/storage). The PVs pin MySQL and
+# ProjectSend to patron; 18G of uploads aren't worth moving across the LAN.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: projectsend-mysql
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  claimRef: { namespace: projectsend, name: mysql-data }
+  hostPath:
+    path: /home/xzr/storage/k8s/projectsend/mysql
+    type: Directory
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - patron
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: projectsend-config
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  claimRef: { namespace: projectsend, name: projectsend-config }
+  hostPath:
+    path: /home/xzr/storage/k8s/projectsend/config
+    type: Directory
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - patron
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: projectsend-data
+spec:
+  capacity:
+    storage: 50Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  claimRef: { namespace: projectsend, name: projectsend-data }
+  hostPath:
+    path: /home/xzr/storage/k8s/projectsend/data
+    type: Directory
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - patron
