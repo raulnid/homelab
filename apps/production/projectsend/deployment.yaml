@@ -1,0 +1,81 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: projectsend-config
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ""
+  volumeName: projectsend-config
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: projectsend-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ""
+  volumeName: projectsend-data
+  resources:
+    requests:
+      storage: 50Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: projectsend
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: projectsend
+  template:
+    metadata:
+      labels:
+        app: projectsend
+    spec:
+      containers:
+        - name: projectsend
+          image: lscr.io/linuxserver/projectsend:r2098-ls286
+          env:
+            # owner of the copied files on patron (xzr)
+            - { name: PUID, value: "1000" }
+            - { name: PGID, value: "1000" }
+            - { name: TZ, value: Europe/Madrid }
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: data
+              mountPath: /data
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "50m"
+            limits:
+              memory: "512Mi"
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: projectsend-config
+        - name: data
+          persistentVolumeClaim:
+            claimName: projectsend-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: projectsend
+spec:
+  selector:
+    app: projectsend
+  ports:
+    - port: 80
+      targetPort: 80

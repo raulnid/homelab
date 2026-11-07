@@ -5,3 +5,5 @@ resources:
   - namespace.yaml
   - pv.yaml
   - mysql.yaml
+  - deployment.yaml
+  - httproute.yaml
