@@ -14,6 +14,7 @@ spec:
     - { dnsName: hubble.xzr.es,  recordType: A, targets: [192.168.1.240] }
     - { dnsName: jenkins.xzr.es, recordType: A, targets: [192.168.1.240] }
     - { dnsName: mealie.xzr.es,  recordType: A, targets: [192.168.1.240] }
+    - { dnsName: projectsend.xzr.es, recordType: A, targets: [192.168.1.240] }
     - { dnsName: siyuan.xzr.es,  recordType: A, targets: [192.168.1.240] }
     - { dnsName: stats.xzr.es,   recordType: A, targets: [192.168.1.240] }
     - { dnsName: stremio.xzr.es, recordType: A, targets: [192.168.1.240] }

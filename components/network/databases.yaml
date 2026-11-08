@@ -79,6 +79,21 @@ spec:
             - { port: "5432", protocol: TCP }
             - { port: "8000", protocol: TCP }
 ---
+# ProjectSend's own MySQL (it doesn't support Postgres): only ProjectSend talks to it.
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: projectsend-mysql
+specs:
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: projectsend, app: mysql } }
+    ingress:
+      - fromEndpoints: [{ matchLabels: { k8s:io.kubernetes.pod.namespace: projectsend, app: projectsend } }]
+        toPorts: [{ ports: [{ port: "3306", protocol: TCP }] }]
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: projectsend, app: projectsend } }
+    egress:
+      - toEndpoints: [{ matchLabels: { k8s:io.kubernetes.pod.namespace: projectsend, app: mysql } }]
+        toPorts: [{ ports: [{ port: "3306", protocol: TCP }] }]
+---
 # Valkey: replication between its pods, clients on the LAN through the 192.168.1.244 VIP
 apiVersion: cilium.io/v2
 kind: CiliumClusterwideNetworkPolicy

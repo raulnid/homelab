@@ -20,6 +20,8 @@ specs:
     ingress: [{ fromEntities: [ingress], toPorts: [{ ports: [{ port: "8080", protocol: TCP }] }] }]
   - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: powerdns, app.kubernetes.io/name: powerdns-admin } }
     ingress: [{ fromEntities: [ingress], toPorts: [{ ports: [{ port: "80", protocol: TCP }] }] }]
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: projectsend, app: projectsend } }
+    ingress: [{ fromEntities: [ingress], toPorts: [{ ports: [{ port: "80", protocol: TCP }] }] }]
   - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: siyuan, app: siyuan } }
     ingress: [{ fromEntities: [ingress], toPorts: [{ ports: [{ port: "6806", protocol: TCP }] }] }]
   - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: stremio, app: stremio } }
