@@ -9,7 +9,10 @@ spec:
   hostnames:
   - "stremio.xzr.es"
   rules:
-  - matches:
+  # no request timeout: video streams and multi-GB uploads outlive Envoy's 15s default
+  - timeouts:
+      request: 0s
+    matches:
     - path:
         type: PathPrefix
         value: "/"
