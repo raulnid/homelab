@@ -7,7 +7,7 @@ spec:
   - name: cilium-gateway
     namespace: kube-system
   hostnames:
-  - "projectsend.xzr.es"
+  - "files.xzr.es"
   rules:
   # no request timeout: video streams and multi-GB uploads outlive Envoy's 15s default
   - timeouts:
