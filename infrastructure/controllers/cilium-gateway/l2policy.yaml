@@ -6,3 +6,10 @@ metadata:
 spec:
   loadBalancerIPs: true
   externalIPs: false
+  # wg0 on node1 is NOARP; announcing there breaks the eno1 ARP entry
+  interfaces:
+    - ^eno1$
+  # patron has no eno1 (enp3s0): if it won a lease it would announce on nothing and the VIP would go dark
+  nodeSelector:
+    matchExpressions:
+      - { key: kubernetes.io/hostname, operator: NotIn, values: [patron] }

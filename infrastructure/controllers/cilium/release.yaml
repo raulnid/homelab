@@ -30,6 +30,10 @@ spec:
       enabled: true
     l2announcements:
       enabled: true
+      # one control plane: a short API hiccup was enough to move VIPs, and each move risks stale ARP entries
+      leaseDuration: 30s
+      leaseRenewDeadline: 20s
+      leaseRetryPeriod: 2s
     l2NeighDiscovery:
       enabled: true
     externalIPs:
