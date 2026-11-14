@@ -92,16 +92,3 @@ spec:
       toPorts: [{ ports: [{ port: "25565", protocol: TCP }] }]
     - toCIDR: [192.168.1.0/24]
       toPorts: [{ ports: [{ port: "8081", protocol: TCP }] }]
-    # that LAN service is ProjectSend's hostPort on patron; Cilium checks the translated pod and port
-    - toEndpoints: [{ matchLabels: { k8s:io.kubernetes.pod.namespace: projectsend, app: projectsend } }]
-      toPorts: [{ ports: [{ port: "80", protocol: TCP }] }]
----
-apiVersion: cilium.io/v2
-kind: CiliumClusterwideNetworkPolicy
-metadata:
-  name: projectsend-from-wireguard
-spec:
-  endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: projectsend, app: projectsend } }
-  ingress:
-    - fromEndpoints: [{ matchLabels: { k8s:io.kubernetes.pod.namespace: wireguard, app: wireguard } }]
-      toPorts: [{ ports: [{ port: "80", protocol: TCP }] }]

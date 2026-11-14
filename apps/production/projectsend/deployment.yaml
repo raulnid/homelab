@@ -50,8 +50,6 @@ spec:
             - { name: TZ, value: Europe/Madrid }
           ports:
             - containerPort: 80
-              # the VPS still reaches ProjectSend through the WireGuard pod at patron:8081, as with Docker
-              hostPort: 8081
           volumeMounts:
             - name: config
               mountPath: /config
