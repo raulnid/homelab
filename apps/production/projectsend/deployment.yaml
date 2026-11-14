@@ -42,7 +42,7 @@ spec:
     spec:
       containers:
         - name: projectsend
-          image: lscr.io/linuxserver/projectsend:r2098-ls286
+          image: lscr.io/linuxserver/projectsend:r2098-ls7
           env:
             # owner of the copied files on patron (xzr)
             - { name: PUID, value: "1000" }
