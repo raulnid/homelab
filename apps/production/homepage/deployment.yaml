@@ -33,10 +33,11 @@ spec:
             - { name: PGID, value: "1000" }
           ports:
             - { name: http, containerPort: 3000 }
+          # homepage rejects any Host outside HOMEPAGE_ALLOWED_HOSTS, the kubelet's pod IP included
           readinessProbe:
-            httpGet: { path: /api/healthcheck, port: http }
+            httpGet: { path: /api/healthcheck, port: http, httpHeaders: [{ name: Host, value: home.xzr.es }] }
           livenessProbe:
-            httpGet: { path: /api/healthcheck, port: http }
+            httpGet: { path: /api/healthcheck, port: http, httpHeaders: [{ name: Host, value: home.xzr.es }] }
             initialDelaySeconds: 30
           resources:
             requests: { cpu: 10m, memory: 96Mi }
