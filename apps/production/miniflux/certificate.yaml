@@ -1,0 +1,22 @@
+# Client certificate for the "miniflux" Postgres user (24h, OpenBao PKI); pg_hba requires it on top of the password.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: miniflux-postgres
+  namespace: miniflux
+spec:
+  secretName: miniflux-pg-tls
+  duration: 24h
+  renewBefore: 8h
+  commonName: miniflux
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  usages:
+    - client auth
+    - digital signature
+    - key encipherment
+  issuerRef:
+    name: openbao-pg-client
+    kind: ClusterIssuer
+    group: cert-manager.io

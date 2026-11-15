@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: linkding
+  namespace: linkding
+  annotations:
+    reloader.stakater.com/auto: "true"
+  labels:
+    app.kubernetes.io/name: linkding
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: linkding
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: linkding
+    spec:
+      automountServiceAccountToken: false
+      # The image starts as root (chown of data/, then uwsgi and supervisord drop to www-data),
+      # so only the capabilities for that are kept.
+      securityContext:
+        fsGroup: 33
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: linkding
+          image: sissbruecker/linkding:1.47.0@sha256:e35cb50e0581178f245125ffaa909c565416c94c9f22ace305a7d234a4345522
+          env:
+            - name: DB_USER
+              valueFrom: { secretKeyRef: { name: linkding-db-creds, key: username } }
+            - name: DB_PASSWORD
+              valueFrom: { secretKeyRef: { name: linkding-db-creds, key: password } }
+            - { name: LD_DB_ENGINE, value: postgres }
+            - { name: LD_DB_HOST, value: pg-rw.pg-internal.svc.cluster.local }
+            - { name: LD_DB_PORT, value: "5432" }
+            - { name: LD_DB_DATABASE, value: linkding }
+            - { name: LD_DB_USER, value: $(DB_USER) }
+            - { name: LD_DB_PASSWORD, value: $(DB_PASSWORD) }
+            - name: LD_DB_OPTIONS
+              value: '{"sslmode": "verify-full", "sslrootcert": "/etc/pg-ca/ca.crt", "sslcert": "/etc/pg-tls/tls.crt", "sslkey": "/etc/pg-tls/tls.key"}'
+            # creates the first user only if there is none
+            - name: LD_SUPERUSER_NAME
+              valueFrom: { secretKeyRef: { name: linkding, key: superuser-name } }
+            - name: LD_SUPERUSER_PASSWORD
+              valueFrom: { secretKeyRef: { name: linkding, key: superuser-password } }
+            - { name: LD_CSRF_TRUSTED_ORIGINS, value: "https://links.xzr.es" }
+          ports:
+            - { name: http, containerPort: 9090 }
+          readinessProbe:
+            httpGet: { path: /health, port: http }
+          livenessProbe:
+            httpGet: { path: /health, port: http }
+            initialDelaySeconds: 60
+          resources:
+            requests: { cpu: 20m, memory: 192Mi }
+            limits: { memory: 512Mi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+              add: [CHOWN, SETUID, SETGID]
+          volumeMounts:
+            # favicons, previews and the task queue: rebuilt on their own, so not persisted
+            - { name: data, mountPath: /etc/linkding/data }
+            - { name: secret-key, mountPath: /etc/linkding/data/secretkey.txt, subPath: secretkey.txt, readOnly: true }
+            - { name: pg-ca, mountPath: /etc/pg-ca, readOnly: true }
+            - { name: pg-tls, mountPath: /etc/pg-tls, readOnly: true }
+      volumes:
+        - name: data
+          emptyDir: {}
+        - name: secret-key
+          secret:
+            secretName: linkding
+            items: [{ key: secretkey.txt, path: secretkey.txt }]
+        - name: pg-ca
+          secret:
+            secretName: linkding-pg-ca
+        - name: pg-tls
+          secret:
+            secretName: linkding-pg-tls
+            # libpq refuses a key readable by others; root-owned 0440 + fsGroup is accepted
+            defaultMode: 0440

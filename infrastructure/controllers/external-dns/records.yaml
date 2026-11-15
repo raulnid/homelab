@@ -11,10 +11,13 @@ spec:
     - { dnsName: dns.xzr.es,     recordType: A, targets: [192.168.1.240] }
     - { dnsName: files.xzr.es,   recordType: A, targets: [192.168.1.240] }
     - { dnsName: git.xzr.es,     recordType: A, targets: [192.168.1.240] }
+    - { dnsName: home.xzr.es,    recordType: A, targets: [192.168.1.240] }
     - { dnsName: hub.xzr.es,     recordType: A, targets: [192.168.1.240] }
     - { dnsName: hubble.xzr.es,  recordType: A, targets: [192.168.1.240] }
     - { dnsName: jenkins.xzr.es, recordType: A, targets: [192.168.1.240] }
+    - { dnsName: links.xzr.es,   recordType: A, targets: [192.168.1.240] }
     - { dnsName: mealie.xzr.es,  recordType: A, targets: [192.168.1.240] }
+    - { dnsName: rss.xzr.es,     recordType: A, targets: [192.168.1.240] }
     - { dnsName: siyuan.xzr.es,  recordType: A, targets: [192.168.1.240] }
     - { dnsName: stats.xzr.es,   recordType: A, targets: [192.168.1.240] }
     - { dnsName: stremio.xzr.es, recordType: A, targets: [192.168.1.240] }

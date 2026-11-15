@@ -1,0 +1,45 @@
+# LAN only (home.xzr.es is an internal record) and no login, so nothing here may hold a secret.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homepage
+  namespace: homepage
+data:
+  settings.yaml: |
+    title: xzr
+    language: es
+    theme: dark
+    color: slate
+    headerStyle: clean
+    layout:
+      Apps: { style: row, columns: 4 }
+      Plataforma: { style: row, columns: 4 }
+  widgets.yaml: |
+    - greeting: { text_size: xl, text: Homelab }
+    - datetime: { format: { dateStyle: long, timeStyle: short } }
+    - search: { provider: duckduckgo, target: _blank }
+  services.yaml: |
+    - Apps:
+        - Miniflux: { href: https://rss.xzr.es, icon: miniflux.png, description: RSS }
+        - Linkding: { href: https://links.xzr.es, icon: linkding.png, description: Marcadores }
+        - Mealie: { href: https://mealie.xzr.es, icon: mealie.png, description: Recetas }
+        - SiYuan: { href: https://siyuan.xzr.es, icon: siyuan.png, description: Notas }
+        - ProjectSend: { href: https://files.xzr.es, icon: projectsend.png, description: Archivos }
+        - Stremio: { href: https://stremio.xzr.es, icon: stremio.png, description: Pelis y series }
+    - Plataforma:
+        - Grafana: { href: https://stats.xzr.es, icon: grafana.png, description: Métricas }
+        - Hubble: { href: https://hubble.xzr.es, icon: cilium.png, description: Red }
+        - authentik: { href: https://auth.xzr.es, icon: authentik.png, description: SSO }
+        - OpenBao: { href: https://vault.xzr.es, icon: openbao.png, description: Secretos }
+        - PowerDNS: { href: https://dns.xzr.es, icon: powerdns.png, description: DNS }
+        - Forgejo: { href: https://git.xzr.es, icon: forgejo.png, description: Git }
+        - Harbor: { href: https://hub.xzr.es, icon: harbor.png, description: Registry }
+        - Jenkins: { href: https://jenkins.xzr.es, icon: jenkins.png, description: CI }
+  bookmarks.yaml: |
+    - Dev:
+        - GitHub: [{ href: https://github.com/raulnid/homelab, abbr: GH }]
+  kubernetes.yaml: |
+    mode: disabled
+  docker.yaml: ""
+  custom.css: ""
+  custom.js: ""

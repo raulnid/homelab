@@ -14,8 +14,13 @@ spec:
   postgresql:
     # App users need a client cert whose CN is their role name, on top of the password.
     pg_hba:
-      - hostssl all dns,authentik,stepca all scram-sha-256 clientcert=verify-full
-      - host all dns,authentik,stepca all reject
+      - hostssl all dns,authentik,stepca,miniflux,linkding all scram-sha-256 clientcert=verify-full
+      - host all dns,authentik,stepca,miniflux,linkding all reject
+  # Roles of the apps added later. No passwordSecret: OpenBao's static roles set and rotate the password.
+  managed:
+    roles:
+      - { name: miniflux, ensure: present, login: true }
+      - { name: linkding, ensure: present, login: true }
   storage:
     size: 10Gi
     storageClass: postgres-local

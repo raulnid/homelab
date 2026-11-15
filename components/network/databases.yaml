@@ -15,6 +15,8 @@ spec:
         - matchLabels: { k8s:io.kubernetes.pod.namespace: powerdns, app.kubernetes.io/name: powerdns-auth }
         - matchLabels: { k8s:io.kubernetes.pod.namespace: powerdns, app.kubernetes.io/name: powerdns-admin }
         - matchLabels: { k8s:io.kubernetes.pod.namespace: step-ca, app: step-ca }
+        - matchLabels: { k8s:io.kubernetes.pod.namespace: miniflux, app.kubernetes.io/name: miniflux }
+        - matchLabels: { k8s:io.kubernetes.pod.namespace: linkding, app.kubernetes.io/name: linkding }
         # database secrets engine: static-role password rotation
         - matchLabels: { k8s:io.kubernetes.pod.namespace: openbao, app.kubernetes.io/name: openbao, component: server }
       toPorts: [{ ports: [{ port: "5432", protocol: TCP }] }]
@@ -36,6 +38,10 @@ specs:
   - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: powerdns, app.kubernetes.io/name: powerdns-admin } }
     egress: *toprimary
   - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: step-ca, app: step-ca } }
+    egress: *toprimary
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: miniflux, app.kubernetes.io/name: miniflux } }
+    egress: *toprimary
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: linkding, app.kubernetes.io/name: linkding } }
     egress: *toprimary
   - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: openbao, app.kubernetes.io/name: openbao, component: server } }
     egress: *toprimary

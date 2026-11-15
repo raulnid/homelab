@@ -26,6 +26,12 @@ specs:
     ingress: [{ fromEntities: [ingress], toPorts: [{ ports: [{ port: "6806", protocol: TCP }] }] }]
   - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: stremio, app: stremio } }
     ingress: [{ fromEntities: [ingress], toPorts: [{ ports: [{ port: "8080", protocol: TCP }] }] }]
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: homepage, app.kubernetes.io/name: homepage } }
+    ingress: [{ fromEntities: [ingress], toPorts: [{ ports: [{ port: "3000", protocol: TCP }] }] }]
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: miniflux, app.kubernetes.io/name: miniflux } }
+    ingress: [{ fromEntities: [ingress], toPorts: [{ ports: [{ port: "8080", protocol: TCP }] }] }]
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: linkding, app.kubernetes.io/name: linkding } }
+    ingress: [{ fromEntities: [ingress], toPorts: [{ ports: [{ port: "9090", protocol: TCP }] }] }]
 ---
 # Pods calling https://*.xzr.es go through the gateway VIP (OIDC back-channel to auth.xzr.es, kaniko pushing
 # to hub.xzr.es). Two checks apply on that path: L3/L4 from the pod to the "ingress" entity on 443, and then

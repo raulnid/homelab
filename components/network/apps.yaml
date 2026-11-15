@@ -44,6 +44,7 @@ specs:
 ---
 # Forgejo: pull mirrors from GitHub over HTTPS (no SSH remotes)
 # Mealie: recipe import fetches arbitrary sites
+# Miniflux: feeds; Linkding: titles, favicons and previews of the bookmarked pages
 # `world` on 443/80 and not toFQDNs: toFQDNs puts every DNS answer through Cilium's L7 proxy.
 apiVersion: cilium.io/v2
 kind: CiliumClusterwideNetworkPolicy
@@ -53,12 +54,16 @@ specs:
   - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: forgejo, app.kubernetes.io/name: forgejo } }
     egress: [{ toEntities: [world], toPorts: [{ ports: [{ port: "443", protocol: TCP }] }] }]
   - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: mealie, app: mealie } }
-    egress:
+    egress: &web
       - toEntities: [world]
         toPorts:
           - ports:
               - { port: "443", protocol: TCP }
               - { port: "80", protocol: TCP }
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: miniflux, app.kubernetes.io/name: miniflux } }
+    egress: *web
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: linkding, app.kubernetes.io/name: linkding } }
+    egress: *web
 ---
 # Stremio: addons over HTTPS and BitTorrent peers on whatever port they announce (TCP and UDP),
 # so no port list.
