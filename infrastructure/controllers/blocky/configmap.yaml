@@ -28,7 +28,14 @@ data:
     blocking:
       denylists:
         ads:
-          - https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/pro-onlydomains.txt
+          # wildcard format (*.domain) so subdomains are blocked too
+          - https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/pro.txt
+          # Google ads that Hagezi Pro allows on purpose (breaks clicks on Google Shopping ads)
+          - |
+            *.doubleclick.net
+            *.googleadservices.com
+            *.googlesyndication.com
+            *.adservice.google.com
       clientGroupsBlock:
         default:
           - ads
