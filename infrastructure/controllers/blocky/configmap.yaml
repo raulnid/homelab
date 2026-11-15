@@ -1,0 +1,45 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: blocky-config
+  namespace: blocky
+data:
+  config.yml: |
+    ports:
+      dns: 1053
+      http: 4000
+
+    # powerdns-recursor (ClusterIP pinned in powerdns-recursor/recursor-deployment.yaml)
+    upstreams:
+      groups:
+        default:
+          - 10.105.230.172
+      timeout: 2s
+      init:
+        strategy: fast
+    bootstrapDns:
+      - upstream: 10.105.230.172
+
+    blocking:
+      denylists:
+        ads:
+          - https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/pro-onlydomains.txt
+      clientGroupsBlock:
+        default:
+          - ads
+      blockType: zeroIp
+      blockTTL: 1m
+      loading:
+        refreshPeriod: 24h
+        # serve DNS straight away and keep the old list if a download fails
+        strategy: fast
+
+    caching:
+      prefetching: true
+
+    prometheus:
+      enable: true
+
+    queryLog:
+      type: none

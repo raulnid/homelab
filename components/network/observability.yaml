@@ -34,6 +34,8 @@ spec:
       toPorts: [{ ports: [{ port: "10250", protocol: TCP }] }]
     - toEndpoints: [{ matchLabels: { k8s:io.kubernetes.pod.namespace: monitoring, app.kubernetes.io/name: kube-state-metrics } }]
       toPorts: [{ ports: [{ port: "8080", protocol: TCP }] }]
+    - toEndpoints: [{ matchLabels: { k8s:io.kubernetes.pod.namespace: blocky, app.kubernetes.io/name: blocky } }]
+      toPorts: [{ ports: [{ port: "4000", protocol: TCP }] }]
 ---
 apiVersion: cilium.io/v2
 kind: CiliumClusterwideNetworkPolicy
@@ -52,6 +54,8 @@ specs:
     ingress: [{ fromEndpoints: [{ matchLabels: *prom }], toPorts: [{ ports: [{ port: "10250", protocol: TCP }] }] }]
   - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: monitoring, app.kubernetes.io/name: kube-state-metrics } }
     ingress: [{ fromEndpoints: [{ matchLabels: *prom }], toPorts: [{ ports: [{ port: "8080", protocol: TCP }] }] }]
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: blocky, app.kubernetes.io/name: blocky } }
+    ingress: [{ fromEndpoints: [{ matchLabels: *prom }], toPorts: [{ ports: [{ port: "4000", protocol: TCP }] }] }]
 ---
 apiVersion: cilium.io/v2
 kind: CiliumClusterwideNetworkPolicy

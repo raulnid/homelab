@@ -1,7 +1,7 @@
 # kubeadm's CoreDNS config, taken over by Flux.
 #  - xzr.es: internal records from powerdns-auth first; names it doesn't know (NXDOMAIN) fall back to the
-#    public zone in Cloudflare. The .250 recursor sends xzr.es here too, so the LAN gets the same answers.
-#  - everything else outside cluster.local: the powerdns-recursor LB (.250).
+#    public zone in Cloudflare. The recursor sends xzr.es here too, so the LAN gets the same answers.
+#  - everything else outside cluster.local: powerdns-recursor (ClusterIP pinned in its Service), unfiltered.
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -30,7 +30,7 @@ data:
            ttl 30
         }
         prometheus :9153
-        forward . 192.168.1.250 {
+        forward . 10.105.230.172 {
            max_concurrent 1000
         }
         cache 30 {

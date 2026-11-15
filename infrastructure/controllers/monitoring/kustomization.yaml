@@ -7,3 +7,4 @@ resources:
   - release.yaml
   - httproute.yaml
   - cert-manager.yaml
+  - blocky.yaml

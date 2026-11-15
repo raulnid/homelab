@@ -68,8 +68,9 @@ metadata:
     app.kubernetes.io/component: recursor
     app.kubernetes.io/part-of: powerdns
 spec:
-  type: LoadBalancer
-  loadBalancerIP: 192.168.1.250
+  type: ClusterIP
+  # pinned: CoreDNS, Blocky and cert-manager point here and only take IPs. The LAN goes through Blocky (.250).
+  clusterIP: 10.105.230.172
   ports:
   - name: dns-udp
     port: 53
