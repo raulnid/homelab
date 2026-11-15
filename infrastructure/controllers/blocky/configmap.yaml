@@ -18,6 +18,9 @@ data:
       timeout: 2s
       init:
         strategy: fast
+    # list downloads resolve here, not through CoreDNS, so they work while CoreDNS is restarting
+    bootstrapDns:
+      - upstream: 1.1.1.1
 
     # internal names via CoreDNS (10.96.0.10, kubeadm's fixed clusterDNS): xzr.es from powerdns-auth first
     conditional:
