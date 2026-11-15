@@ -10,16 +10,20 @@ data:
       dns: 1053
       http: 4000
 
-    # powerdns-recursor (ClusterIP pinned in powerdns-recursor/recursor-deployment.yaml)
     upstreams:
       groups:
         default:
-          - 10.105.230.172
+          - 1.1.1.1
+          - 1.0.0.1
       timeout: 2s
       init:
         strategy: fast
-    bootstrapDns:
-      - upstream: 10.105.230.172
+
+    # internal names via CoreDNS (10.96.0.10, kubeadm's fixed clusterDNS): xzr.es from powerdns-auth first
+    conditional:
+      mapping:
+        xzr.es: 10.96.0.10
+        cluster.local: 10.96.0.10
 
     blocking:
       denylists:

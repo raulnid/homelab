@@ -9,7 +9,6 @@ resources:
   - ../../controllers/cilium-gateway
   - ../../controllers/postgres/clusters
   - ../../controllers/powerdns
-  - ../../controllers/powerdns-recursor
   - ../../controllers/blocky
   - ../../controllers/coredns
   # Cluster-wide default-deny plus per-flow allows (CiliumClusterwideNetworkPolicy)

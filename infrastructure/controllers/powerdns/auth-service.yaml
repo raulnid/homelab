@@ -5,14 +5,18 @@ kind: Service
 metadata:
   name: powerdns-auth-dns
   namespace: powerdns
+  annotations:
+    # clusterIP is immutable: let Flux recreate the Service when it changes
+    kustomize.toolkit.fluxcd.io/force: Enabled
   labels:
     app.kubernetes.io/name: powerdns-auth
     app.kubernetes.io/component: dns
     app.kubernetes.io/part-of: powerdns
 spec:
   type: ClusterIP
-  # pinned: CoreDNS forwards xzr.es here and its forward plugin only takes IPs
-  clusterIP: 10.103.117.139
+  # pinned: CoreDNS forwards xzr.es here and its forward plugin only takes IPs.
+  # 10.96.0.0-255 is the static band of the /12 that the allocator leaves for fixed IPs.
+  clusterIP: 10.96.0.53
   ports:
   - name: dns-udp
     port: 53

@@ -26,7 +26,7 @@ spec:
         enabled: false
     webhook:
       timeoutSeconds: 4
-    # DNS-01 self-checks against the recursor's pinned ClusterIP, past Blocky's cache (it forwards xzr.es to powerdns-auth); public DNS is Cloudflare and never sees the TXT
+    # DNS-01 self-checks against CoreDNS, whose xzr.es block reads powerdns-auth uncached (it forwards xzr.es to powerdns-auth); public DNS is Cloudflare and never sees the TXT
     extraArgs:
-      - --dns01-recursive-nameservers=10.105.230.172:53
+      - --dns01-recursive-nameservers=10.96.0.10:53
       - --dns01-recursive-nameservers-only

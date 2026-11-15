@@ -1,7 +1,8 @@
 # kubeadm's CoreDNS config, taken over by Flux.
 #  - xzr.es: internal records from powerdns-auth first; names it doesn't know (NXDOMAIN) fall back to the
-#    public zone in Cloudflare. The recursor sends xzr.es here too, so the LAN gets the same answers.
-#  - everything else outside cluster.local: powerdns-recursor (ClusterIP pinned in its Service), unfiltered.
+#    public zone in Cloudflare. Blocky (.250) sends xzr.es here too, so the LAN gets the same answers.
+#    No cache: cert-manager's DNS-01 check and step-ca's validation must see a new TXT straight away.
+#  - everything else outside cluster.local: Cloudflare, unfiltered (ad blocking is only for the LAN).
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -11,9 +12,8 @@ data:
   Corefile: |
     xzr.es:53 {
         errors
-        cache 30
         # powerdns-auth-dns (ClusterIP pinned in powerdns/auth-service.yaml)
-        forward . 10.103.117.139 {
+        forward . 10.96.0.53 {
             next NXDOMAIN
         }
         forward . 1.1.1.1 1.0.0.1
@@ -30,7 +30,7 @@ data:
            ttl 30
         }
         prometheus :9153
-        forward . 10.105.230.172 {
+        forward . 1.1.1.1 1.0.0.1 {
            max_concurrent 1000
         }
         cache 30 {
