@@ -66,11 +66,10 @@ spec:
         - ports:
             - { port: "1053", protocol: UDP }
             - { port: "1053", protocol: TCP }
-    # HTTP API: external-dns, the DNS-01 webhook, the admin panel and the zone CronJob
+    # HTTP API: external-dns, the DNS-01 webhook and the zone CronJob
     - fromEndpoints:
         - matchLabels: { k8s:io.kubernetes.pod.namespace: external-dns, app.kubernetes.io/name: external-dns }
         - matchLabels: { k8s:io.kubernetes.pod.namespace: cert-manager, app.kubernetes.io/name: cert-manager-webhook-pdns }
-        - matchLabels: { k8s:io.kubernetes.pod.namespace: powerdns, app.kubernetes.io/name: powerdns-admin }
         - matchExpressions:
             - { key: k8s:io.kubernetes.pod.namespace, operator: In, values: [powerdns] }
             - { key: batch.kubernetes.io/job-name, operator: Exists }
@@ -88,8 +87,6 @@ specs:
       - toEndpoints: [{ matchLabels: { k8s:io.kubernetes.pod.namespace: powerdns, app.kubernetes.io/name: powerdns-auth } }]
         toPorts: [{ ports: [{ port: "8081", protocol: TCP }] }]
   - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: cert-manager, app.kubernetes.io/name: cert-manager-webhook-pdns } }
-    egress: *pdnsapi
-  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: powerdns, app.kubernetes.io/name: powerdns-admin } }
     egress: *pdnsapi
   - endpointSelector:
       matchExpressions:

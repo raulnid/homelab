@@ -8,7 +8,6 @@ spec:
   endpoints:
     # everything behind the cilium-gateway
     - { dnsName: auth.xzr.es,    recordType: A, targets: [192.168.1.240] }
-    - { dnsName: dns.xzr.es,     recordType: A, targets: [192.168.1.240] }
     - { dnsName: files.xzr.es,   recordType: A, targets: [192.168.1.240] }
     - { dnsName: git.xzr.es,     recordType: A, targets: [192.168.1.240] }
     - { dnsName: home.xzr.es,    recordType: A, targets: [192.168.1.240] }

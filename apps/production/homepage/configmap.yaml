@@ -31,7 +31,6 @@ data:
         - Hubble: { href: https://hubble.xzr.es, icon: cilium.png, description: Red }
         - authentik: { href: https://auth.xzr.es, icon: authentik.png, description: SSO }
         - OpenBao: { href: https://vault.xzr.es, icon: openbao.png, description: Secretos }
-        - PowerDNS: { href: https://dns.xzr.es, icon: powerdns.png, description: DNS }
         - Forgejo: { href: https://git.xzr.es, icon: forgejo.png, description: Git }
         - Harbor: { href: https://hub.xzr.es, icon: harbor.png, description: Registry }
         - Jenkins: { href: https://jenkins.xzr.es, icon: jenkins.png, description: CI }

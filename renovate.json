@@ -49,15 +49,6 @@
       "schedule": [
         "every weekend"
       ]
-    },
-    {
-      "matchDatasources": [
-        "docker"
-      ],
-      "matchPackageNames": [
-        "powerdnsadmin/pda-legacy"
-      ],
-      "sourceUrl": "https://github.com/PowerDNS-Admin/PowerDNS-Admin"
     }
   ],
   "customManagers": [

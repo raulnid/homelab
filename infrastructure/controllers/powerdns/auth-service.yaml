@@ -30,7 +30,7 @@ spec:
     app.kubernetes.io/name: powerdns-auth
     app.kubernetes.io/part-of: powerdns
 ---
-# Service for the API (PowerDNS-Admin and cert-manager)
+# Service for the API (external-dns and cert-manager)
 apiVersion: v1
 kind: Service
 metadata:

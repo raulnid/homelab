@@ -13,7 +13,6 @@ spec:
     - fromEndpoints:
         - matchLabels: { k8s:io.kubernetes.pod.namespace: authentik, app.kubernetes.io/name: authentik }
         - matchLabels: { k8s:io.kubernetes.pod.namespace: powerdns, app.kubernetes.io/name: powerdns-auth }
-        - matchLabels: { k8s:io.kubernetes.pod.namespace: powerdns, app.kubernetes.io/name: powerdns-admin }
         - matchLabels: { k8s:io.kubernetes.pod.namespace: step-ca, app: step-ca }
         - matchLabels: { k8s:io.kubernetes.pod.namespace: miniflux, app.kubernetes.io/name: miniflux }
         - matchLabels: { k8s:io.kubernetes.pod.namespace: linkding, app.kubernetes.io/name: linkding }
@@ -34,8 +33,6 @@ specs:
       - toEndpoints: [{ matchLabels: { k8s:io.kubernetes.pod.namespace: pg-internal, cnpg.io/cluster: pg, cnpg.io/instanceRole: primary } }]
         toPorts: [{ ports: [{ port: "5432", protocol: TCP }] }]
   - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: powerdns, app.kubernetes.io/name: powerdns-auth } }
-    egress: *toprimary
-  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: powerdns, app.kubernetes.io/name: powerdns-admin } }
     egress: *toprimary
   - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: step-ca, app: step-ca } }
     egress: *toprimary

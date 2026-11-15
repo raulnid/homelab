@@ -123,4 +123,4 @@ components/                  Default-deny network policies, pod security admissi
 
 - Require SPIRE mutual authentication on the pod-to-pod allows (SPIRE is deployed, the policies don't ask for it yet).
 - Off-cluster backups: CNPG to object storage and OpenBao raft snapshots, with a tested restore.
-- SSO for Mealie and PowerDNS-Admin.
+- SSO for Mealie.
