@@ -390,7 +390,7 @@ entries:
     network_binding: no_binding
     remember_device: days=30
     remember_me_offset: seconds=0
-    session_duration: seconds=0
+    session_duration: weeks=2
     terminate_other_sessions: false
 - model: authentik_stages_user_login.userloginstage
   state: present
@@ -402,7 +402,7 @@ entries:
     network_binding: no_binding
     remember_device: days=30
     remember_me_offset: seconds=0
-    session_duration: seconds=0
+    session_duration: weeks=2
     terminate_other_sessions: false
 - model: authentik_stages_user_login.userloginstage
   state: present
@@ -414,7 +414,7 @@ entries:
     network_binding: no_binding
     remember_device: days=30
     remember_me_offset: seconds=0
-    session_duration: seconds=0
+    session_duration: weeks=2
     terminate_other_sessions: false
 - model: authentik_stages_user_logout.userlogoutstage
   state: present
