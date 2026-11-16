@@ -1,0 +1,68 @@
+# Journeys through the gateway, the way a LAN client walks them: DNS, the 192.168.1.240 VIP, TLS with
+# the wildcard cert, then the backend. Read-only, so nothing to clean up.
+interval: 60s
+
+targets:
+  - name: homelab
+    safe: true
+    tls:
+      ca_file: /etc/herakles/tls/ca.crt  # step-ca root, signs the wildcard
+
+labors:
+  # Harbor's OIDC discovery leads to a JWKS with signing keys: what every relying party needs to log in.
+  - name: auth
+    steps:
+      - name: ready
+        http:
+          url: https://auth.xzr.es/-/health/ready/
+      - name: discovery
+        description: OIDC discovery of the Harbor provider
+        http:
+          url: https://auth.xzr.es/application/o/harbor/.well-known/openid-configuration
+          assert:
+            jsonpath: {$.issuer: "https://auth.xzr.es/application/o/harbor/"}
+          capture:
+            jwks_uri: {jsonpath: $.jwks_uri}
+      - name: jwks
+        description: The JWKS from the discovery has a signing key
+        http:
+          url: "{{ .vars.jwks_uri }}"
+          assert:
+            jsonpath: {"$.keys[0].use": sig}
+
+  - name: git
+    steps:
+      - name: healthz
+        description: Forgejo reaches its database and cache
+        http:
+          url: https://git.xzr.es/api/healthz
+          assert:
+            jsonpath: {$.status: pass}
+
+  # What `docker pull` does: hit /v2/, follow the Bearer challenge to the token service, read a manifest.
+  - name: hub
+    steps:
+      - name: health
+        description: Every Harbor component reports healthy
+        http:
+          url: https://hub.xzr.es/api/v2.0/health
+          assert:
+            jsonpath: {$.status: healthy}
+      - name: challenge
+        description: The registry asks for a token
+        http:
+          url: https://hub.xzr.es/v2/
+          assert: {status: [401]}
+      - name: token
+        description: Anonymous pull token for the public library project
+        http:
+          url: https://hub.xzr.es/service/token?service=harbor-registry&scope=repository:library/wg-beacon:pull
+          capture:
+            token: {jsonpath: $.token, secret: true}
+      - name: manifest
+        description: The token pulls the manifest of library/wg-beacon
+        http:
+          url: https://hub.xzr.es/v2/library/wg-beacon/manifests/latest
+          headers:
+            Authorization: "Bearer {{ .vars.token }}"
+            Accept: application/vnd.oci.image.index.v1+json, application/vnd.oci.image.manifest.v1+json, application/vnd.docker.distribution.manifest.v2+json, application/vnd.docker.distribution.manifest.list.v2+json

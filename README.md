@@ -96,7 +96,7 @@ Each stage is a Flux `Kustomization` that waits for the previous one. That keeps
 | Secrets | OpenBao, External Secrets Operator, Reloader |
 | Identity | authentik |
 | Data | CloudNativePG (PostgreSQL), Valkey |
-| Observability | Prometheus, Grafana, Loki, Alloy, Tetragon |
+| Observability | Prometheus, Grafana, Loki, Alloy, Tetragon, herakles (synthetic journeys through the gateway) |
 | Delivery | Jenkins, kaniko, Harbor, Forgejo |
 
 ## Hardware

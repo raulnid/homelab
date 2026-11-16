@@ -55,6 +55,17 @@ specs:
     egress: *oidc
   - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: jenkins, app.kubernetes.io/component: jenkins-controller } }
     egress: *oidc
+  # herakles walks auth, git and hub through the gateway, like a LAN client
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: herakles, app.kubernetes.io/name: herakles } }
+    egress:
+      - toEntities: [ingress]
+        toPorts: [{ ports: [{ port: "443", protocol: TCP }] }]
+      - toEndpoints: [{ matchLabels: { k8s:io.kubernetes.pod.namespace: authentik, app.kubernetes.io/name: authentik, app.kubernetes.io/component: server } }]
+        toPorts: [{ ports: [{ port: "9000", protocol: TCP }] }]
+      - toEndpoints: [{ matchLabels: { k8s:io.kubernetes.pod.namespace: forgejo, app.kubernetes.io/name: forgejo } }]
+        toPorts: [{ ports: [{ port: "3000", protocol: TCP }] }]
+      - toEndpoints: [{ matchLabels: { k8s:io.kubernetes.pod.namespace: harbor, app: harbor, component: nginx } }]
+        toPorts: [{ ports: [{ port: "8080", protocol: TCP }] }]
   # kaniko agents -> hub.xzr.es
   - endpointSelector:
       matchExpressions:

@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: herakles
+  namespace: herakles
+  labels:
+    app.kubernetes.io/name: herakles
+spec:
+  # one probe per journey: two replicas would double every series
+  replicas: 1
+  strategy: { type: Recreate }
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: herakles
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: herakles
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: herakles
+          image: ghcr.io/raulnid/herakles:0.3.0@sha256:1653bc60efa94527621496aa44022b5f96517fbcd3f9541f80327517af3fc231
+          args: [run, -config, /etc/herakles/config/herakles.yaml]
+          env:
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef: { resource: limits.memory }
+          ports:
+            - { name: metrics, containerPort: 9090 }
+          livenessProbe:
+            httpGet: { path: /health, port: metrics }
+          readinessProbe:
+            httpGet: { path: /health, port: metrics }
+          resources:
+            requests: { cpu: 10m, memory: 32Mi }
+            limits: { memory: 64Mi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+          volumeMounts:
+            - { name: config, mountPath: /etc/herakles/config, readOnly: true }
+            - { name: ca, mountPath: /etc/herakles/tls, readOnly: true }
+      volumes:
+        - name: config
+          configMap: { name: herakles-config }
+        - name: ca
+          secret: { secretName: herakles-ca }

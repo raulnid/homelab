@@ -1,0 +1,97 @@
+# herakles (apps/production/herakles) walks auth, git and hub through the gateway every minute.
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: herakles
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+spec:
+  namespaceSelector:
+    matchNames: [herakles]
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: herakles
+  podMetricsEndpoints:
+    - port: metrics
+      interval: 60s
+---
+# From herakles v0.3.0 examples/kubernetes/monitoring/prometheusrule.yaml, with 60s cycles:
+# 5m is about 5 failed cycles in a row.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: herakles
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: herakles
+      rules:
+        - alert: HeraklesDown
+          # every rule below goes silent when the probe is gone
+          expr: absent(up{job="monitoring/herakles"} == 1)
+          for: 5m
+          labels: { severity: critical }
+          annotations:
+            summary: herakles is down or not scraped, no journey is being probed
+        - alert: HeraklesLaborFailing
+          expr: herakles_labor_success == 0
+          for: 5m
+          labels: { severity: critical }
+          annotations:
+            summary: "{{ $labels.labor }}.xzr.es journey fails"
+            description: 'Failing step: herakles_labor_failed_step{labor="{{ $labels.labor }}"} == 1, and the herakles logs.'
+        - alert: HeraklesLaborStale
+          # a failed labor skips the ones after it in the cycle
+          expr: time() - herakles_labor_last_success_timestamp_seconds > 900
+          labels: { severity: critical }
+          annotations:
+            summary: "{{ $labels.labor }}.xzr.es journey has not passed for 15 minutes"
+        - alert: HeraklesCycleFailing
+          # e.g. the CA file can't be read, so no labor runs at all
+          expr: herakles_cycle_success == 0
+          for: 10m
+          labels: { severity: warning }
+          annotations:
+            summary: herakles cycles keep failing before any journey runs
+        - alert: HeraklesCertExpiringSoon
+          # earliest NotAfter in the chain the gateway served: the wildcard or the intermediate
+          expr: herakles_tls_cert_expiry_timestamp_seconds - time() < 7 * 86400
+          for: 1h
+          labels: { severity: warning }
+          annotations:
+            summary: "The certificate on {{ $labels.labor }}.xzr.es expires in {{ $value | humanizeDuration }}"
+    # 99.9% of journeys pass over 30 days; multiwindow burn rate (SRE workbook):
+    # 14.4x over 1h/5m spends 2% of the budget, 6x over 6h/30m spends 5%.
+    - name: herakles-slo
+      rules:
+        - record: herakles:labor_error_ratio:rate5m
+          expr: |
+            sum by (target, labor) (rate(herakles_labor_runs_total{result="failed"}[5m]))
+            / sum by (target, labor) (rate(herakles_labor_runs_total{result=~"ok|failed"}[5m]))
+        - record: herakles:labor_error_ratio:rate30m
+          expr: |
+            sum by (target, labor) (rate(herakles_labor_runs_total{result="failed"}[30m]))
+            / sum by (target, labor) (rate(herakles_labor_runs_total{result=~"ok|failed"}[30m]))
+        - record: herakles:labor_error_ratio:rate1h
+          expr: |
+            sum by (target, labor) (rate(herakles_labor_runs_total{result="failed"}[1h]))
+            / sum by (target, labor) (rate(herakles_labor_runs_total{result=~"ok|failed"}[1h]))
+        - record: herakles:labor_error_ratio:rate6h
+          expr: |
+            sum by (target, labor) (rate(herakles_labor_runs_total{result="failed"}[6h]))
+            / sum by (target, labor) (rate(herakles_labor_runs_total{result=~"ok|failed"}[6h]))
+        - alert: HeraklesLaborErrorBudgetBurn
+          expr: |
+            (
+              herakles:labor_error_ratio:rate1h > (14.4 * 0.001)
+              and herakles:labor_error_ratio:rate5m > (14.4 * 0.001)
+            ) or (
+              herakles:labor_error_ratio:rate6h > (6 * 0.001)
+              and herakles:labor_error_ratio:rate30m > (6 * 0.001)
+            )
+          labels: { severity: critical }
+          annotations:
+            summary: "{{ $labels.labor }}.xzr.es burns its 99.9% error budget too fast"

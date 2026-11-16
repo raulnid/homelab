@@ -36,6 +36,8 @@ spec:
       toPorts: [{ ports: [{ port: "8080", protocol: TCP }] }]
     - toEndpoints: [{ matchLabels: { k8s:io.kubernetes.pod.namespace: blocky, app.kubernetes.io/name: blocky } }]
       toPorts: [{ ports: [{ port: "4000", protocol: TCP }] }]
+    - toEndpoints: [{ matchLabels: { k8s:io.kubernetes.pod.namespace: herakles, app.kubernetes.io/name: herakles } }]
+      toPorts: [{ ports: [{ port: "9090", protocol: TCP }] }]
 ---
 apiVersion: cilium.io/v2
 kind: CiliumClusterwideNetworkPolicy
@@ -56,6 +58,8 @@ specs:
     ingress: [{ fromEndpoints: [{ matchLabels: *prom }], toPorts: [{ ports: [{ port: "8080", protocol: TCP }] }] }]
   - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: blocky, app.kubernetes.io/name: blocky } }
     ingress: [{ fromEndpoints: [{ matchLabels: *prom }], toPorts: [{ ports: [{ port: "4000", protocol: TCP }] }] }]
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: herakles, app.kubernetes.io/name: herakles } }
+    ingress: [{ fromEndpoints: [{ matchLabels: *prom }], toPorts: [{ ports: [{ port: "9090", protocol: TCP }] }] }]
 ---
 apiVersion: cilium.io/v2
 kind: CiliumClusterwideNetworkPolicy
