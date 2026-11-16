@@ -10,3 +10,4 @@ resources:
   - databases.yaml
   - observability.yaml
   - apps.yaml
+  - storage.yaml

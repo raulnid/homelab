@@ -1,0 +1,44 @@
+# Layout, keys, buckets and grants through the admin API; every step is a no-op when already done.
+# The ConfigMap name carries a content hash, so changing bootstrap.py makes Flux replace the Job.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: garage-bootstrap
+  namespace: garage
+  annotations:
+    kustomize.toolkit.fluxcd.io/force: enabled
+spec:
+  backoffLimit: 10
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: garage-bootstrap
+    spec:
+      restartPolicy: OnFailure
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: bootstrap
+          image: python:3.13-alpine@sha256:9ef1a599f863231c3d91e941389bfdc4a2d6070557243d54df1a4e57015b960e
+          command: [python, /bootstrap/bootstrap.py]
+          env:
+            - { name: GARAGE_ADMIN_URL, value: "http://garage.garage.svc:3903" }
+            - { name: CAPACITY_GB, value: "300" }
+            - { name: CLIENTS, value: "longhorn cnpg openbao" }
+          envFrom:
+            - secretRef: { name: garage }
+          resources:
+            requests: { cpu: 10m, memory: 32Mi }
+            limits: { memory: 64Mi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+          volumeMounts:
+            - { name: script, mountPath: /bootstrap, readOnly: true }
+      volumes:
+        - name: script
+          configMap: { name: garage-bootstrap }

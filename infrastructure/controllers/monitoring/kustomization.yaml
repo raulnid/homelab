@@ -9,6 +9,7 @@ resources:
   - cert-manager.yaml
   - blocky.yaml
   - herakles.yaml
+  - garage.yaml
 configMapGenerator:
   # picked up by Grafana's dashboard sidecar; a stable name so re-imports update it
   - name: herakles-dashboard

@@ -59,3 +59,14 @@
   tasks:
     - name: Longhorn data directory
       ansible.builtin.file: { path: /var/lib/longhorn, state: directory, mode: "0755" }
+
+# Garage runs as uid 1000 on patron's data disk; hostPath PVs need the directories to exist
+- name: Garage storage
+  hosts: patron
+  tasks:
+    - name: Garage directories
+      ansible.builtin.file: { path: "{{ item }}", state: directory, owner: "1000", group: "1000", mode: "0700" }
+      loop:
+        - /home/xzr/storage/k8s/garage
+        - /home/xzr/storage/k8s/garage/meta
+        - /home/xzr/storage/k8s/garage/data

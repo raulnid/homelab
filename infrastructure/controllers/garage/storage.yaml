@@ -1,0 +1,55 @@
+# Backups land on patron's 1 TB data disk (sdb), away from the SSDs they protect. The directories are
+# created by ansible/site.yaml, owned by uid 1000 like the pod.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: garage-meta
+spec:
+  capacity: { storage: 5Gi }
+  accessModes: [ReadWriteOnce]
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  claimRef: { namespace: garage, name: garage-meta }
+  hostPath: { path: /home/xzr/storage/k8s/garage/meta, type: Directory }
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - { key: kubernetes.io/hostname, operator: In, values: [patron] }
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: garage-data
+spec:
+  capacity: { storage: 300Gi }
+  accessModes: [ReadWriteOnce]
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  claimRef: { namespace: garage, name: garage-data }
+  hostPath: { path: /home/xzr/storage/k8s/garage/data, type: Directory }
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - { key: kubernetes.io/hostname, operator: In, values: [patron] }
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: garage-meta
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: ""
+  volumeName: garage-meta
+  resources: { requests: { storage: 5Gi } }
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: garage-data
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: ""
+  volumeName: garage-data
+  resources: { requests: { storage: 300Gi } }

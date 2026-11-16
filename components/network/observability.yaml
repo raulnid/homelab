@@ -38,6 +38,9 @@ spec:
       toPorts: [{ ports: [{ port: "4000", protocol: TCP }] }]
     - toEndpoints: [{ matchLabels: { k8s:io.kubernetes.pod.namespace: herakles, app.kubernetes.io/name: herakles } }]
       toPorts: [{ ports: [{ port: "9090", protocol: TCP }] }]
+    # /metrics on Garage's admin port, open without a token: this allow is the access control
+    - toEndpoints: [{ matchLabels: { k8s:io.kubernetes.pod.namespace: garage, app.kubernetes.io/name: garage } }]
+      toPorts: [{ ports: [{ port: "3903", protocol: TCP }] }]
 ---
 apiVersion: cilium.io/v2
 kind: CiliumClusterwideNetworkPolicy
@@ -60,6 +63,8 @@ specs:
     ingress: [{ fromEndpoints: [{ matchLabels: *prom }], toPorts: [{ ports: [{ port: "4000", protocol: TCP }] }] }]
   - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: herakles, app.kubernetes.io/name: herakles } }
     ingress: [{ fromEndpoints: [{ matchLabels: *prom }], toPorts: [{ ports: [{ port: "9090", protocol: TCP }] }] }]
+  - endpointSelector: { matchLabels: { k8s:io.kubernetes.pod.namespace: garage, app.kubernetes.io/name: garage } }
+    ingress: [{ fromEndpoints: [{ matchLabels: *prom }], toPorts: [{ ports: [{ port: "3903", protocol: TCP }] }] }]
 ---
 apiVersion: cilium.io/v2
 kind: CiliumClusterwideNetworkPolicy

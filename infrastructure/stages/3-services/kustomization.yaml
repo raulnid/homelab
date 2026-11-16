@@ -10,3 +10,4 @@ resources:
   - ../../controllers/external-dns
   - ../../controllers/forgejo
   - ../../controllers/jenkins
+  - ../../controllers/garage

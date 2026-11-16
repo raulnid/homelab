@@ -1,0 +1,43 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: garage
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+spec:
+  namespaceSelector:
+    matchNames: [garage]
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: garage
+  podMetricsEndpoints:
+    - port: admin
+      path: /metrics
+      interval: 60s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: garage
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: garage
+      rules:
+        # every backup in the cluster goes here
+        - alert: GarageDown
+          expr: absent(up{job="monitoring/garage"} == 1)
+          for: 10m
+          labels: { severity: critical }
+          annotations:
+            summary: Garage is down, backups have nowhere to go
+        # the disk is shared with personal files on patron, so watch the disk, not the 300G layout
+        - alert: GarageDiskLow
+          expr: garage_local_disk_avail / garage_local_disk_total < 0.10
+          for: 30m
+          labels: { severity: warning }
+          annotations:
+            summary: "Garage's {{ $labels.volume }} disk on patron is {{ $value | humanizePercentage }} free"
