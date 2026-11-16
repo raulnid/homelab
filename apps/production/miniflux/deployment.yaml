@@ -43,6 +43,18 @@ spec:
               valueFrom: { secretKeyRef: { name: miniflux, key: admin-password } }
             - { name: BASE_URL, value: "https://rss.xzr.es/" }
             - { name: LISTEN_ADDR, value: "0.0.0.0:8080" }
+            # Sign in with authentik; the local admin stays as a fallback and can link its account in Settings
+            - { name: OAUTH2_PROVIDER, value: oidc }
+            - { name: OAUTH2_OIDC_PROVIDER_NAME, value: authentik }
+            - { name: OAUTH2_OIDC_DISCOVERY_ENDPOINT, value: "https://auth.xzr.es/application/o/miniflux/" }
+            - { name: OAUTH2_REDIRECT_URL, value: "https://rss.xzr.es/oauth2/oidc/callback" }
+            - { name: OAUTH2_USER_CREATION, value: "1" }
+            - name: OAUTH2_CLIENT_ID
+              valueFrom: { secretKeyRef: { name: miniflux-oidc, key: client-id } }
+            - name: OAUTH2_CLIENT_SECRET
+              valueFrom: { secretKeyRef: { name: miniflux-oidc, key: client-secret } }
+            # Go adds every file in this dir to the system roots, so auth.xzr.es (step-ca) verifies and feeds still do
+            - { name: SSL_CERT_DIR, value: /etc/pg-ca }
           ports:
             - { name: http, containerPort: 8080 }
           readinessProbe:

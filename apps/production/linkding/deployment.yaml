@@ -23,6 +23,22 @@ spec:
       securityContext:
         fsGroup: 33
         seccompProfile: { type: RuntimeDefault }
+      # requests trusts one bundle only: certifi's public roots plus the step-ca root, so both
+      # auth.xzr.es and the bookmarked sites verify
+      initContainers:
+        - name: ca-bundle
+          image: sissbruecker/linkding:1.47.0@sha256:e35cb50e0581178f245125ffaa909c565416c94c9f22ace305a7d234a4345522
+          command: [sh, -c, 'cat "$(python -m certifi)" /etc/pg-ca/ca.crt > /etc/linkding/ca/bundle.pem']
+          securityContext:
+            runAsUser: 33
+            runAsGroup: 33
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+          volumeMounts:
+            - { name: pg-ca, mountPath: /etc/pg-ca, readOnly: true }
+            - { name: ca-bundle, mountPath: /etc/linkding/ca }
       containers:
         - name: linkding
           image: sissbruecker/linkding:1.47.0@sha256:e35cb50e0581178f245125ffaa909c565416c94c9f22ace305a7d234a4345522
@@ -44,7 +60,18 @@ spec:
               valueFrom: { secretKeyRef: { name: linkding, key: superuser-name } }
             - name: LD_SUPERUSER_PASSWORD
               valueFrom: { secretKeyRef: { name: linkding, key: superuser-password } }
-            - { name: LD_CSRF_TRUSTED_ORIGINS, value: "https://links.xzr.es" }
+            # Sign in with authentik; an existing user with the same email is reused, so the superuser keeps its bookmarks
+            - { name: LD_ENABLE_OIDC, value: "True" }
+            - { name: OIDC_OP_AUTHORIZATION_ENDPOINT, value: "https://auth.xzr.es/application/o/authorize/" }
+            - { name: OIDC_OP_TOKEN_ENDPOINT, value: "https://auth.xzr.es/application/o/token/" }
+            - { name: OIDC_OP_USER_ENDPOINT, value: "https://auth.xzr.es/application/o/userinfo/" }
+            - { name: OIDC_OP_JWKS_ENDPOINT, value: "https://auth.xzr.es/application/o/linkding/jwks/" }
+            - { name: OIDC_USERNAME_CLAIM, value: preferred_username }
+            - name: OIDC_RP_CLIENT_ID
+              valueFrom: { secretKeyRef: { name: linkding-oidc, key: client-id } }
+            - name: OIDC_RP_CLIENT_SECRET
+              valueFrom: { secretKeyRef: { name: linkding-oidc, key: client-secret } }
+            - { name: REQUESTS_CA_BUNDLE, value: /etc/linkding/ca/bundle.pem }
           ports:
             - { name: http, containerPort: 9090 }
           readinessProbe:
@@ -66,6 +93,7 @@ spec:
             - { name: secret-key, mountPath: /etc/linkding/data/secretkey.txt, subPath: secretkey.txt, readOnly: true }
             - { name: pg-ca, mountPath: /etc/pg-ca, readOnly: true }
             - { name: pg-tls, mountPath: /etc/pg-tls, readOnly: true }
+            - { name: ca-bundle, mountPath: /etc/linkding/ca, readOnly: true }
       volumes:
         - name: data
           emptyDir: {}
@@ -73,6 +101,8 @@ spec:
           secret:
             secretName: linkding
             items: [{ key: secretkey.txt, path: secretkey.txt }]
+        - name: ca-bundle
+          emptyDir: {}
         - name: pg-ca
           secret:
             secretName: linkding-pg-ca

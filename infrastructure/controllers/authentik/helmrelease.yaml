@@ -99,6 +99,16 @@ spec:
             secretKeyRef:
               name: authentik-provider-secrets
               key: jenkins
+        - name: AUTHENTIK_PROVIDER_SECRET_MINIFLUX
+          valueFrom:
+            secretKeyRef:
+              name: authentik-provider-secrets
+              key: miniflux
+        - name: AUTHENTIK_PROVIDER_SECRET_LINKDING
+          valueFrom:
+            secretKeyRef:
+              name: authentik-provider-secrets
+              key: linkding
 
       volumes:
         - name: pg-ca

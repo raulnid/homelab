@@ -104,3 +104,27 @@ entries:
     policy_engine_mode: any
     slug: jenkins
     provider: !Find [authentik_providers_oauth2.oauth2provider, [name, Provider for Jenkins]]
+- model: authentik_core.application
+  state: present
+  identifiers:
+    slug: miniflux
+  attrs:
+    meta_icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/webp/miniflux.webp
+    meta_launch_url: https://rss.xzr.es
+    name: Miniflux
+    open_in_new_tab: true
+    policy_engine_mode: any
+    slug: miniflux
+    provider: !Find [authentik_providers_oauth2.oauth2provider, [name, Provider for Miniflux]]
+- model: authentik_core.application
+  state: present
+  identifiers:
+    slug: linkding
+  attrs:
+    meta_icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/webp/linkding.webp
+    meta_launch_url: https://links.xzr.es
+    name: Linkding
+    open_in_new_tab: true
+    policy_engine_mode: any
+    slug: linkding
+    provider: !Find [authentik_providers_oauth2.oauth2provider, [name, Provider for Linkding]]
