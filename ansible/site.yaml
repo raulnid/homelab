@@ -1,0 +1,53 @@
+# What the nodes need from the OS, and nothing else: Kubernetes owns everything above it.
+# Run from ansible/:  ansible-playbook site.yaml -K            (--check --diff first to preview)
+- name: Kubernetes nodes
+  hosts: k8s
+  handlers:
+    - name: Restart journald
+      ansible.builtin.systemd_service: { name: systemd-journald, state: restarted }
+    - name: Restart multipathd
+      ansible.builtin.systemd_service: { name: multipathd, state: restarted }
+  tasks:
+    - name: Journal capped at 500 MB
+      ansible.builtin.copy:
+        dest: /etc/systemd/journald.conf.d/size.conf
+        content: |
+          [Journal]
+          SystemMaxUse=500M
+        mode: "0644"
+      notify: Restart journald
+
+    # Longhorn attaches every volume over iSCSI, and RWX volumes over NFS, on any node that runs the pod
+    - name: iSCSI and NFS clients
+      ansible.builtin.apt:
+        name: [open-iscsi, nfs-common]
+        state: present
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: iscsi_tcp loaded now and at boot
+      community.general.modprobe: { name: iscsi_tcp, persistent: present }
+
+    - name: iscsid running
+      ansible.builtin.systemd_service: { name: iscsid, enabled: true, state: started }
+
+    # multipathd grabs the /dev/sdX that Longhorn attaches and the mount fails ("already mounted or busy").
+    # No node uses multipath, so every sd device is blacklisted.
+    - name: multipathd leaves sd devices alone
+      ansible.builtin.copy:
+        dest: /etc/multipath.conf
+        content: |
+          defaults {
+              user_friendly_names yes
+          }
+          blacklist {
+              devnode "^sd[a-z0-9]+"
+          }
+        mode: "0644"
+      notify: Restart multipathd
+
+- name: Longhorn storage nodes
+  hosts: longhorn_storage
+  tasks:
+    - name: Longhorn data directory
+      ansible.builtin.file: { path: /var/lib/longhorn, state: directory, mode: "0755" }

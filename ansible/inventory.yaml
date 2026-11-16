@@ -1,0 +1,15 @@
+# Host names are ~/.ssh/config aliases (HostName, User).
+all:
+  children:
+    k8s:
+      hosts:
+        nodo1:
+        nodo2:
+        nodo3:
+        patron:
+    # Longhorn replicas live only on the SSDs; patron is HDD and only mounts volumes
+    longhorn_storage:
+      hosts:
+        nodo1:
+        nodo2:
+        nodo3:

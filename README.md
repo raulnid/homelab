@@ -117,6 +117,7 @@ infrastructure/stages/       What each stage deploys
 infrastructure/controllers/  One directory per platform component
 apps/production/             Applications
 components/                  Default-deny network policies, pod security admission
+ansible/                     What the nodes need from the OS (iSCSI for Longhorn, journal size), applied by hand
 ```
 
 ## Roadmap
