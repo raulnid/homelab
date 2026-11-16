@@ -5,9 +5,17 @@
   handlers:
     - name: Restart journald
       ansible.builtin.systemd_service: { name: systemd-journald, state: restarted }
+    # the new limit only applies at the next rotation; trim what is already there now
+    - name: Vacuum journal
+      ansible.builtin.command: journalctl --vacuum-size=500M
+      changed_when: true
     - name: Restart multipathd
       ansible.builtin.systemd_service: { name: multipathd, state: restarted }
   tasks:
+    # Ubuntu doesn't ship the drop-in dir, and copy in --check doesn't notice it's missing
+    - name: journald drop-in directory
+      ansible.builtin.file: { path: /etc/systemd/journald.conf.d, state: directory, mode: "0755" }
+
     - name: Journal capped at 500 MB
       ansible.builtin.copy:
         dest: /etc/systemd/journald.conf.d/size.conf
@@ -15,7 +23,7 @@
           [Journal]
           SystemMaxUse=500M
         mode: "0644"
-      notify: Restart journald
+      notify: [Restart journald, Vacuum journal]
 
     # Longhorn attaches every volume over iSCSI, and RWX volumes over NFS, on any node that runs the pod
     - name: iSCSI and NFS clients
